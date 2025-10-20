@@ -1,0 +1,41 @@
+name: 🚀 Build and Push Fullstack Docker Image
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: docker_fullstack
+  DOCKERHUB_USERNAME: sanchaljustgrow
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🧭 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 🔑 Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: sanchaljustgrow
+          password: dckr_pat_NgPTTMB_9WI8_OeWvyBRXJknwwI
+
+      - name: 🐳 Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+            ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.run_number }}
+
+      - name: ✅ Verify pushed image
+        run: docker pull ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
