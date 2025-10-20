@@ -27,15 +27,20 @@ jobs:
           username: sanchaljustgrow
           password: dckr_pat_NgPTTMB_9WI8_OeWvyBRXJknwwI
 
+      - name: 🔢 Get sequential build number
+        id: build_number
+        run: |
+          COUNT=$(git rev-list --count HEAD)
+          echo "Build number: $COUNT"
+          echo "build_number=$COUNT" >> $GITHUB_OUTPUT
+
       - name: 🐳 Build and push Docker image
         uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile
           push: true
-          tags: |
-
-            ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.run_number }}
+          tags: ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ steps.build_number.outputs.build_number }}
 
       - name: ✅ Verify pushed image
-        run: docker pull ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+        run: docker pull ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ steps.build_number.outputs.build_number }}
