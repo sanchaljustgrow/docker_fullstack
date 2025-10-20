@@ -1,77 +1,65 @@
-# --------------------------
-# Base OS
-# --------------------------
+# Base image
 FROM ubuntu:22.04
 
-# --------------------------
-# Install Required Packages
-# --------------------------
-RUN apt-get update && apt-get install -y \
-    openjdk-17-jdk \
-    nodejs \
-    npm \
-    nginx \
-    mysql-server \
-    curl \
-    vim \
-    net-tools \
-    git \
-    && apt-get clean
+# Disable interactive mode
+ENV DEBIAN_FRONTEND=noninteractive
 
-# --------------------------
-# Set Working Directory
-# --------------------------
-WORKDIR /app
+# Update packages
+RUN apt-get update && apt-get upgrade -y
 
-# --------------------------
-# Copy Spring Boot Backend
-# --------------------------
-COPY backend/task-backend.jar /app/backend.jar
+# Install basic dependencies
+RUN apt-get install -y curl wget gnupg2 software-properties-common lsb-release vim supervisor lsb-release
 
-# --------------------------
-# Copy Angular Frontend
-# --------------------------
-COPY frontend/ /app/frontend/
+# ----------------------------
+# 1. Install Java 11
+# ----------------------------
+RUN apt-get install -y openjdk-11-jdk
+RUN java -version
 
-# --------------------------
-# Copy Nginx Config
-# --------------------------
-COPY nginx.conf /etc/nginx/sites-enabled/default
+# ----------------------------
+# 2. Install MySQL Server
+# ----------------------------
+RUN apt-get install -y mysql-server && \
+    systemctl enable mysql || true
 
-# --------------------------
-# Copy MySQL Initialization Script
-# --------------------------
-COPY init.sql /docker-entrypoint-initdb.d/init.sql
-
-# --------------------------
-# Build Angular UI
-# --------------------------
-WORKDIR /app/frontend
-RUN npm install && npm run build --prod
-
-# Move Angular dist to Nginx web root
-RUN rm -rf /var/www/html/* && cp -r dist/* /var/www/html/
-
-# --------------------------
-# Configure MySQL
-# --------------------------
+# Secure MySQL and set root password
 RUN service mysql start && \
-    mysql -e "CREATE DATABASE IF NOT EXISTS taskdb;" && \
-    mysql -e "CREATE USER IF NOT EXISTS 'taskuser'@'%' IDENTIFIED BY 'taskpass';" && \
-    mysql -e "GRANT ALL PRIVILEGES ON taskdb.* TO 'taskuser'@'%';" && \
-    mysql -e "FLUSH PRIVILEGES;"
+    mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root'; FLUSH PRIVILEGES;"
 
-# --------------------------
-# Expose Ports
-# --------------------------
-EXPOSE 80 8080 3306
+# ----------------------------
+# 3. Install Nginx
+# ----------------------------
+RUN apt-get install -y nginx && \
+    systemctl enable nginx || true
 
-# --------------------------
-# Start All Services
-# --------------------------
-WORKDIR /app
-CMD service mysql start && \
-    echo "✅ MySQL started" && \
-    java -jar /app/backend.jar & \
-    echo "✅ Spring Boot started" && \
-    nginx -g "daemon off;"
+# ----------------------------
+# 4. Install Node.js (v20 via latest NVM)
+# ----------------------------
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh | bash
+ENV NVM_DIR=/root/.nvm
+ENV NODE_VERSION=20
+RUN . "$NVM_DIR/nvm.sh" && \
+    nvm install $NODE_VERSION && \
+    nvm use $NODE_VERSION && \
+    nvm alias default $NODE_VERSION && \
+    node -v && npm -v
+ENV PATH=$NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
+
+# ----------------------------
+# 5. Install Certbot for Nginx SSL
+# ----------------------------
+RUN apt-get install -y certbot python3-certbot-nginx
+
+# ----------------------------
+# 6. Setup supervisord to run all services
+# ----------------------------
+RUN mkdir -p /var/log/supervisor
+
+# Copy your supervisord config (define commands to start MySQL, Nginx, Java app, Node app)
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Expose necessary ports
+EXPOSE 80 443 3306 8080
+
+# Start supervisord
+CMD ["/usr/bin/supervisord", "-n"]
