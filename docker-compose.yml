@@ -1,46 +1,41 @@
-version: '3.9'
+version: "3.8"
 
 services:
-  # ----------------- MySQL Database -----------------
-  mysql:
+  timp-mysql:
     image: mysql:8.0
     container_name: timp-mysql
-    restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root123        # root password
-      MYSQL_DATABASE: timpdb              # initial database
-      MYSQL_USER: timpuser                # non-root user
-      MYSQL_PASSWORD: userpass            # non-root password
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: timpdb
     ports:
-      - "3307:3306"                       # host 3307 -> container 3306 (avoid conflict)
+      - "3307:3306"
     volumes:
-      - mysql-data:/var/lib/mysql
+      - mysql_data:/var/lib/mysql
+    restart: always
 
-  # ----------------- Backend (Spring Boot) -----------------
-  backend:
+  timp-backend:
     image: sanchaljustgrow/timp-frontend:TIMP-API-0.0.1-SNAPSHOT
     container_name: timp-backend
-    restart: always
-    depends_on:
-      - mysql
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://timp-mysql:3306/timpdb
-      SPRING_DATASOURCE_USERNAME: timpuser
-      SPRING_DATASOURCE_PASSWORD: userpass
     ports:
       - "8080:8080"
+    depends_on:
+      - timp-mysql
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://timp-mysql:3306/timpdb
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    restart: always
 
-  # ----------------- Frontend (Angular + Nginx) -----------------
-  frontend:
+  timp-frontend:
     image: sanchaljustgrow/timp-frontend:TIMP2.0.0
     container_name: timp-frontend
-    restart: always
-    depends_on:
-      - backend
     ports:
-      - "8081:80"   # host 8081 -> container 80
-    
+      - "8081:80"
+    depends_on:
+      - timp-backend
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    restart: always
 
-# ----------------- Volumes -----------------
 volumes:
-  mysql-data:
+  mysql_data:
