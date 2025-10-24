@@ -1,39 +1,36 @@
-version: "3.9"
+version: '3.9'
 
 services:
+  # ----------------- MySQL Database -----------------
   mysql:
     image: mysql:8.0
     container_name: timp-mysql
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: root123        # root password
+      MYSQL_DATABASE: timpdb              # initial database
+      MYSQL_USER: timpuser                # non-root user
+      MYSQL_PASSWORD: userpass            # non-root password
     ports:
-      - "3307:3306"
+      - "3307:3306"                       # host 3307 -> container 3306 (avoid conflict)
     volumes:
-      - mysql_data:/var/lib/mysql
-    networks:
-      - timp-network
+      - mysql-data:/var/lib/mysql
 
+  # ----------------- Backend (Spring Boot) -----------------
   backend:
     image: sanchaljustgrow/timp-frontend:TIMP-API-0.0.1-SNAPSHOT
     container_name: timp-backend
-    restart: on-failure
+    restart: always
     depends_on:
       - mysql
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://timp-mysql:3306/${MYSQL_DATABASE}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
-      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      SERVER_PORT: 8080
+      SPRING_DATASOURCE_URL: jdbc:mysql://timp-mysql:3306/timpdb
+      SPRING_DATASOURCE_USERNAME: timpuser
+      SPRING_DATASOURCE_PASSWORD: userpass
     ports:
       - "8080:8080"
-    networks:
-      - timp-network
 
+  # ----------------- Frontend (Angular + Nginx) -----------------
   frontend:
     image: sanchaljustgrow/timp-frontend:TIMP2.0.0
     container_name: timp-frontend
@@ -41,15 +38,10 @@ services:
     depends_on:
       - backend
     ports:
-      - "8081:80"
-    networks:
-      - timp-network
+      - "8081:80"   # host 8081 -> container 80
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf   # optional, create nginx.conf if needed
 
+# ----------------- Volumes -----------------
 volumes:
-  mysql_data:
-
-networks:
-  timp-network:
-    driver: bridge
+  mysql-data:
