@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   timp-mysql:
     image: mysql:8.0
@@ -12,29 +14,29 @@ services:
     restart: always
 
   timp-backend:
-    image: sanchaljustgrow/timp-backend:TIMP-API-0
+    image: sanchaljustgrow/timp-frontend:TIMP-API-0.0.1-SNAPSHOT
     container_name: timp-backend
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://timp-mysql:3306/timpdb?allowPublicKeyRetrieval=true&useSSL=false
+      SPRING_DATASOURCE_URL: jdbc:mysql://timp-mysql:3306/timpdb?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
+      SERVER_PORT: 8080
     depends_on:
       - timp-mysql
     ports:
-      - "8081:8080"
+      - "8080:8080"
     restart: always
 
   timp-frontend:
-    image: sanchaljustgrow/timp-frontend:TIMP-UI-0
+    image: sanchaljustgrow/timp-frontend:TIMP2.0.0
     container_name: timp-frontend
     ports:
-      - "80:80"
+      - "8081:80"
     environment:
-      - API_BASE_URL=http://localhost:8081/v1
+      - API_BASE_URL=http://localhost:8080/v1
     depends_on:
       - timp-backend
     restart: always
-    
 
 volumes:
   mysql_data:
