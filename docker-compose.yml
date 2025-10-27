@@ -45,13 +45,10 @@ services:
       - timp-backend
     ports:
       - "8081:80"
-    environment:
-      #  Base API URL for frontend to communicate with backend
-      API_BASE_URL: "http://timp-backend:8080/v1"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
     restart: always
 
-# -------------------- #
-# Persistent Volume
-# -------------------- #
 volumes:
   mysql_data:
+
