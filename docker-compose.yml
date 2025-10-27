@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   timp-mysql:
     image: mysql:8.0
@@ -12,7 +14,7 @@ services:
     restart: always
 
   timp-backend:
-    image: sanchaljustgrow/timp-backend:TIMP-API-0.0.1-SNAPSHOT
+    image: sanchaljustgrow/timp-frontend:TIMP-API-0.0.1-SNAPSHOT
     container_name: timp-backend
     depends_on:
       - timp-mysql
@@ -34,9 +36,8 @@ services:
       - timp-backend
     ports:
       - "8081:80"
-    # Mount Nginx configuration if needed
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
     restart: always
 
 volumes:
