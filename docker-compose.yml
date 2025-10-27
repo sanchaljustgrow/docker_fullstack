@@ -14,25 +14,25 @@ services:
     restart: always
 
   timp-backend:
-    image: sanchaljustgrow/timp-frontend:TIMP-API-0.0.1-SNAPSHOT
+    image: sanchaljustgrow/timp-backend:TIMP-API-0.0.1-SNAPSHOT
     container_name: timp-backend
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://timp-mysql:3306/timpdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_URL: jdbc:mysql://timp-mysql:3306/timpdb?allowPublicKeyRetrieval=true&useSSL=false
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
     depends_on:
       - timp-mysql
     ports:
-      - "8081:8080"     # ✅ Backend accessible at http://localhost:8081
+      - "8081:8080"
     restart: always
 
   timp-frontend:
     image: sanchaljustgrow/timp-frontend:TIMP2.0.0
     container_name: timp-frontend
     ports:
-      - "8082:80"       # ✅ Frontend accessible at http://localhost:8082
+      - "8082:80"
     environment:
-      - API_BASE_URL=http://localhost:8081/v1   # ✅ Frontend connects to backend
+      - API_BASE_URL=http://localhost:8081/v1
     depends_on:
       - timp-backend
     restart: always
