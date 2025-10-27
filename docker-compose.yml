@@ -14,7 +14,7 @@ services:
     restart: always
 
   timp-backend:
-    image:sanchaljustgrow/timp-frontend:TIMP-API-0.0.1-SNAPSHOT
+    image: sanchaljustgrow/timp-frontend:TIMP-API-0.0.1-SNAPSHOT
     container_name: timp-backend
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://timp-mysql:3306/timpdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
