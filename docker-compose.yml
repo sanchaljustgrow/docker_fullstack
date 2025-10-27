@@ -1,9 +1,4 @@
-version: "3.8"
-
 services:
-  # -------------------- #
-  # MySQL Database
-  # -------------------- #
   timp-mysql:
     image: mysql:8.0
     container_name: timp-mysql
@@ -16,39 +11,31 @@ services:
       - mysql_data:/var/lib/mysql
     restart: always
 
-  # -------------------- #
-  # Spring Boot Backend
-  # -------------------- #
   timp-backend:
-    image: sanchaljustgrow/timp-frontend:TIMP-API-0.0.1-SNAPSHOT
+    image: sanchaljustgrow/timp-backend:TIMP-API-0
     container_name: timp-backend
-    depends_on:
-      - timp-mysql
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://timp-mysql:3306/timpdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_URL: jdbc:mysql://timp-mysql:3306/timpdb?allowPublicKeyRetrieval=true&useSSL=false
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      SPRING_JPA_SHOW_SQL: "true"
-      SERVER_PORT: 8080
+    depends_on:
+      - timp-mysql
     ports:
-      - "8080:8080"
+      - "8081:8080"
     restart: always
 
-  # -------------------- #
-  # Angular Frontend (Nginx)
-  # -------------------- #
   timp-frontend:
-    image: sanchaljustgrow/timp-frontend:TIMP2.0.0
+    image: sanchaljustgrow/timp-frontend:TIMP-UI-0
     container_name: timp-frontend
+    ports:
+      - "80:80"
+    environment:
+      - API_BASE_URL=http://localhost:8081/v1
     depends_on:
       - timp-backend
-    ports:
-      - "8081:80"
+    restart: always
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
-    restart: always
 
 volumes:
   mysql_data:
-
