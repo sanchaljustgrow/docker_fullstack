@@ -1,6 +1,9 @@
 version: "3.8"
 
 services:
+  # -------------------- #
+  # MySQL Database
+  # -------------------- #
   timp-mysql:
     image: mysql:8.0
     container_name: timp-mysql
@@ -13,6 +16,9 @@ services:
       - mysql_data:/var/lib/mysql
     restart: always
 
+  # -------------------- #
+  # Spring Boot Backend
+  # -------------------- #
   timp-backend:
     image: sanchaljustgrow/timp-frontend:TIMP-API-0.0.1-SNAPSHOT
     container_name: timp-backend
@@ -29,6 +35,9 @@ services:
       - "8080:8080"
     restart: always
 
+  # -------------------- #
+  # Angular Frontend (Nginx)
+  # -------------------- #
   timp-frontend:
     image: sanchaljustgrow/timp-frontend:TIMP2.0.0
     container_name: timp-frontend
@@ -36,8 +45,13 @@ services:
       - timp-backend
     ports:
       - "8081:80"
+    environment:
+      #  Base API URL for frontend to communicate with backend
+      API_BASE_URL: "http://timp-backend:8080/v1"
     restart: always
 
+# -------------------- #
+# Persistent Volume
+# -------------------- #
 volumes:
   mysql_data:
-
