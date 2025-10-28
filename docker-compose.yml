@@ -7,7 +7,7 @@ services:
       MYSQL_DATABASE: realestate
     volumes:
       - db_data:/var/lib/mysql
-    # Use a different port to avoid local MySQL conflict
+    # Use different port (3307) to avoid conflict with local MySQL
     ports:
       - "3307:3306"
     restart: always
