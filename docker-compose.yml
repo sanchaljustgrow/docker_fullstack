@@ -1,43 +1,43 @@
 version: "3.8"
 
 services:
-  backend:
-    image: sanchaljustgrow/real-estate-backend:latest
-    container_name: real-estate-backend
-    restart: always
-    ports:
-      - "8081:3000"
-    environment:
-      NODE_ENV: production
-      DB_HOST: db
-      DB_USER: root
-      DB_PASSWORD: root
-      DB_NAME: realestate
-    depends_on:
-      - db
-
-  frontend:
-    image: sanchaljustgrow/real-estate-frontend:latest
-    container_name: real-estate-frontend
-    restart: always
-    ports:
-      - "80:80"
-    environment:
-      - apiUrl=http://localhost:8081/v1
-    depends_on:
-      - backend
-
-  db:
+  real-estate-db:
     image: mysql:8.0
     container_name: real-estate-db
-    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: realestate
     ports:
-      - "3307:3306"
+      - "3307:3306"   # ✅ Changed to avoid local MySQL conflict
     volumes:
-      - db_data:/var/lib/mysql
+      - mysql_data:/var/lib/mysql
+    restart: always
+
+  real-estate-backend:
+    image: sanchaljustgrow/real-estate-backend:latest
+    container_name: real-estate-backend
+    depends_on:
+      - real-estate-db
+    environment:
+      DB_HOST: real-estate-db
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: root
+      DB_NAME: realestate
+    ports:
+      - "8081:8081"
+    restart: always
+
+  real-estate-frontend:
+    image: sanchaljustgrow/real-estate-frontend:latest
+    container_name: real-estate-frontend
+    depends_on:
+      - real-estate-backend
+    environment:
+      - apiUrl=http://localhost:8081/v1   # ✅ Frontend connects to backend
+    ports:
+      - "8082:80"   # ✅ Frontend now accessible on localhost:8082
+    restart: always
 
 volumes:
-  db_data:
+  mysql_data:
