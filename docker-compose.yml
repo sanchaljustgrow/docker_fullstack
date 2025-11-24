@@ -12,9 +12,8 @@ services:
       EMQX_NODE__COOKIE: mysecretcookie
       EMQX_LISTENER__WS__EXTERNAL: false
       EMQX_LISTENER__WSS__EXTERNAL: false
-      EMQX_CLUSTER__K8S__DISCOVERY: dns
-      EMQX_CLUSTER__K8S__DNS: emqx
-      EMQX_CLUSTER__K8S__NODES: emqx1@emqx1,emqx2@emqx2,emqx3@emqx3
+      EMQX_CLUSTER__DISCOVERY: static
+      EMQX_CLUSTER__STATIC__SEEDS: emqx1@emqx1,emqx2@emqx2,emqx3@emqx3
     ports:
       - "1883:1883"       # MQTT external access
       - "18083:18083"     # Dashboard (optional)
@@ -30,9 +29,8 @@ services:
       EMQX_NODE__COOKIE: mysecretcookie
       EMQX_LISTENER__WS__EXTERNAL: false
       EMQX_LISTENER__WSS__EXTERNAL: false
-      EMQX_CLUSTER__K8S__DISCOVERY: dns
-      EMQX_CLUSTER__K8S__DNS: emqx
-      EMQX_CLUSTER__K8S__NODES: emqx1@emqx1,emqx2@emqx2,emqx3@emqx3
+      EMQX_CLUSTER__DISCOVERY: static
+      EMQX_CLUSTER__STATIC__SEEDS: emqx1@emqx1,emqx2@emqx2,emqx3@emqx3
 
   emqx3:
     image: emqx/emqx:latest
@@ -45,9 +43,8 @@ services:
       EMQX_NODE__COOKIE: mysecretcookie
       EMQX_LISTENER__WS__EXTERNAL: false
       EMQX_LISTENER__WSS__EXTERNAL: false
-      EMQX_CLUSTER__K8S__DISCOVERY: dns
-      EMQX_CLUSTER__K8S__DNS: emqx
-      EMQX_CLUSTER__K8S__NODES: emqx1@emqx1,emqx2@emqx2,emqx3@emqx3
+      EMQX_CLUSTER__DISCOVERY: static
+      EMQX_CLUSTER__STATIC__SEEDS: emqx1@emqx1,emqx2@emqx2,emqx3@emqx3
 
 networks:
   emqx-net:
