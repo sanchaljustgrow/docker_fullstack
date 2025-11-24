@@ -1,0 +1,56 @@
+version: '3.8'
+services:
+  emqx1:
+    image: emqx/emqx:latest
+    container_name: emqx1
+    hostname: emqx1
+    environment:
+      - EMQX_NAME=emqx1@emqx1
+      - EMQX_CLUSTER__DISCOVERY=dns
+      - EMQX_CLUSTER__DNS__NAME=emqx.internal
+    networks:
+      emqx_net:
+        aliases:
+          - emqx1
+          - emqx.internal
+    ports:
+      - "1883:1883"
+      - "8083:8083"
+
+  emqx2:
+    image: emqx/emqx:latest
+    container_name: emqx2
+    hostname: emqx2
+    environment:
+      - EMQX_NAME=emqx2@emqx2
+      - EMQX_CLUSTER__DISCOVERY=dns
+      - EMQX_CLUSTER__DNS__NAME=emqx.internal
+    networks:
+      emqx_net:
+        aliases:
+          - emqx2
+          - emqx.internal
+    ports:
+      - "1884:1883"
+      - "8084:8083"
+
+  emqx3:
+    image: emqx/emqx:latest
+    container_name: emqx3
+    hostname: emqx3
+    environment:
+      - EMQX_NAME=emqx3@emqx3
+      - EMQX_CLUSTER__DISCOVERY=dns
+      - EMQX_CLUSTER__DNS__NAME=emqx.internal
+    networks:
+      emqx_net:
+        aliases:
+          - emqx3
+          - emqx.internal
+    ports:
+      - "1885:1883"
+      - "8085:8083"
+
+networks:
+  emqx_net:
+    driver: bridge
