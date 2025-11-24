@@ -1,16 +1,17 @@
-version: '3.9'
+version: "3.9"
 
 services:
+
   coredns:
     image: coredns/coredns:latest
     container_name: coredns
-    volumes:
-      - ./coredns/Corefile:/Corefile
     networks:
       emqx-net:
-        ipv4_address: 172.18.0.10
+        ipv4_address: 172.19.0.2
+    volumes:
+      - ./coredns/Corefile:/Corefile
     ports:
-      - "53:53/tcp"
+      - "53:53"
       - "53:53/udp"
 
   emqx1:
@@ -19,16 +20,16 @@ services:
     hostname: emqx1
     networks:
       emqx-net:
-        ipv4_address: 172.18.0.2
+        ipv4_address: 172.19.0.3
+    dns:
+      - 172.19.0.2
     environment:
       EMQX_NODE__NAME: emqx1@emqx1
       EMQX_NODE__COOKIE: mysecretcookie
-      EMQX_LISTENER__WS__EXTERNAL: "false"
-      EMQX_LISTENER__WSS__EXTERNAL: "false"
       EMQX_CLUSTER__DISCOVERY: dns
       EMQX_CLUSTER__DNS__NAME: emqx
-    depends_on:
-      - coredns
+      EMQX_LISTENER__WS__EXTERNAL: "false"
+      EMQX_LISTENER__WSS__EXTERNAL: "false"
     ports:
       - "1883:1883"
       - "18083:18083"
@@ -39,16 +40,19 @@ services:
     hostname: emqx2
     networks:
       emqx-net:
-        ipv4_address: 172.18.0.3
+        ipv4_address: 172.19.0.4
+    dns:
+      - 172.19.0.2
     environment:
       EMQX_NODE__NAME: emqx2@emqx2
       EMQX_NODE__COOKIE: mysecretcookie
-      EMQX_LISTENER__WS__EXTERNAL: "false"
-      EMQX_LISTENER__WSS__EXTERNAL: "false"
       EMQX_CLUSTER__DISCOVERY: dns
       EMQX_CLUSTER__DNS__NAME: emqx
-    depends_on:
-      - coredns
+      EMQX_LISTENER__WS__EXTERNAL: "false"
+      EMQX_LISTENER__WSS__EXTERNAL: "false"
+    ports:
+      - "1884:1883"
+      - "18084:18083"
 
   emqx3:
     image: emqx/emqx:latest
@@ -56,20 +60,24 @@ services:
     hostname: emqx3
     networks:
       emqx-net:
-        ipv4_address: 172.18.0.4
+        ipv4_address: 172.19.0.5
+    dns:
+      - 172.19.0.2
     environment:
       EMQX_NODE__NAME: emqx3@emqx3
       EMQX_NODE__COOKIE: mysecretcookie
-      EMQX_LISTENER__WS__EXTERNAL: "false"
-      EMQX_LISTENER__WSS__EXTERNAL: "false"
       EMQX_CLUSTER__DISCOVERY: dns
       EMQX_CLUSTER__DNS__NAME: emqx
-    depends_on:
-      - coredns
+      EMQX_LISTENER__WS__EXTERNAL: "false"
+      EMQX_LISTENER__WSS__EXTERNAL: "false"
+    ports:
+      - "1885:1883"
+      - "18085:18083"
 
 networks:
   emqx-net:
     driver: bridge
     ipam:
+      driver: default
       config:
-        - subnet: 172.18.0.0/16
+        - subnet: 172.19.0.0/16
