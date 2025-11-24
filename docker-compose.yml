@@ -1,51 +1,75 @@
-version: "3.9"
+version: '3.9'
 
 services:
+  coredns:
+    image: coredns/coredns:latest
+    container_name: coredns
+    volumes:
+      - ./coredns/Corefile:/Corefile
+    networks:
+      emqx-net:
+        ipv4_address: 172.18.0.10
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+
   emqx1:
     image: emqx/emqx:latest
     container_name: emqx1
     hostname: emqx1
     networks:
-      - emqx-net
+      emqx-net:
+        ipv4_address: 172.18.0.2
     environment:
       EMQX_NODE__NAME: emqx1@emqx1
       EMQX_NODE__COOKIE: mysecretcookie
-      EMQX_LISTENER__WS__EXTERNAL: false
-      EMQX_LISTENER__WSS__EXTERNAL: false
+      EMQX_LISTENER__WS__EXTERNAL: "false"
+      EMQX_LISTENER__WSS__EXTERNAL: "false"
       EMQX_CLUSTER__DISCOVERY: dns
       EMQX_CLUSTER__DNS__NAME: emqx
+    depends_on:
+      - coredns
     ports:
-      - "1883:1883"       # MQTT external access
-      - "18083:18083"     # Dashboard (optional)
+      - "1883:1883"
+      - "18083:18083"
 
   emqx2:
     image: emqx/emqx:latest
     container_name: emqx2
     hostname: emqx2
     networks:
-      - emqx-net
+      emqx-net:
+        ipv4_address: 172.18.0.3
     environment:
       EMQX_NODE__NAME: emqx2@emqx2
       EMQX_NODE__COOKIE: mysecretcookie
-      EMQX_LISTENER__WS__EXTERNAL: false
-      EMQX_LISTENER__WSS__EXTERNAL: false
+      EMQX_LISTENER__WS__EXTERNAL: "false"
+      EMQX_LISTENER__WSS__EXTERNAL: "false"
       EMQX_CLUSTER__DISCOVERY: dns
       EMQX_CLUSTER__DNS__NAME: emqx
+    depends_on:
+      - coredns
 
   emqx3:
     image: emqx/emqx:latest
     container_name: emqx3
     hostname: emqx3
     networks:
-      - emqx-net
+      emqx-net:
+        ipv4_address: 172.18.0.4
     environment:
       EMQX_NODE__NAME: emqx3@emqx3
       EMQX_NODE__COOKIE: mysecretcookie
-      EMQX_LISTENER__WS__EXTERNAL: false
-      EMQX_LISTENER__WSS__EXTERNAL: false
+      EMQX_LISTENER__WS__EXTERNAL: "false"
+      EMQX_LISTENER__WSS__EXTERNAL: "false"
       EMQX_CLUSTER__DISCOVERY: dns
       EMQX_CLUSTER__DNS__NAME: emqx
+    depends_on:
+      - coredns
 
 networks:
   emqx-net:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.18.0.0/16
