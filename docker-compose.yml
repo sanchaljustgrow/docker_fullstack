@@ -1,9 +1,11 @@
 version: '3.8'
 services:
   emqx1:
-    image: emqx/emqx:latest
+    image: emqx/emqx-enterprise:latest
     hostname: emqx1
     container_name: emqx1
+    volumes:
+      - ./emqx_license:/opt/emqx/etc
     environment:
       - EMQX_NODE_NAME=emqx1@emqx1
       - EMQX_NODE_COOKIE=secretcookie123
@@ -19,9 +21,11 @@ services:
       - "8083:8083"
 
   emqx2:
-    image: emqx/emqx:latest
+    image: emqx/emqx-enterprise:latest
     hostname: emqx2
     container_name: emqx2
+    volumes:
+      - ./emqx_license:/opt/emqx/etc
     environment:
       - EMQX_NODE_NAME=emqx2@emqx2
       - EMQX_NODE_COOKIE=secretcookie123
@@ -37,9 +41,11 @@ services:
       - "8084:8083"
 
   emqx3:
-    image: emqx/emqx:latest
+    image: emqx/emqx-enterprise:latest
     hostname: emqx3
     container_name: emqx3
+    volumes:
+      - ./emqx_license:/opt/emqx/etc
     environment:
       - EMQX_NODE_NAME=emqx3@emqx3
       - EMQX_NODE_COOKIE=secretcookie123
