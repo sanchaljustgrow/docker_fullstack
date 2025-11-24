@@ -5,9 +5,10 @@ services:
     container_name: emqx1
     hostname: emqx1
     environment:
-      - EMQX_NAME=emqx1@emqx1
-      - EMQX_CLUSTER__DISCOVERY=dns
-      - EMQX_CLUSTER__DNS__NAME=emqx.internal
+      - EMQX_NODE_NAME=emqx1@emqx1
+      - EMQX_CLUSTER_DISCOVERY=dns
+      - EMQX_CLUSTER_DNS_NAME=emqx.internal
+      - EMQX_NODE_COOKIE=secretcookie123
     networks:
       emqx_net:
         aliases:
@@ -22,9 +23,10 @@ services:
     container_name: emqx2
     hostname: emqx2
     environment:
-      - EMQX_NAME=emqx2@emqx2
-      - EMQX_CLUSTER__DISCOVERY=dns
-      - EMQX_CLUSTER__DNS__NAME=emqx.internal
+      - EMQX_NODE_NAME=emqx2@emqx2
+      - EMQX_CLUSTER_DISCOVERY=dns
+      - EMQX_CLUSTER_DNS_NAME=emqx.internal
+      - EMQX_NODE_COOKIE=secretcookie123
     networks:
       emqx_net:
         aliases:
@@ -39,9 +41,10 @@ services:
     container_name: emqx3
     hostname: emqx3
     environment:
-      - EMQX_NAME=emqx3@emqx3
-      - EMQX_CLUSTER__DISCOVERY=dns
-      - EMQX_CLUSTER__DNS__NAME=emqx.internal
+      - EMQX_NODE_NAME=emqx3@emqx3
+      - EMQX_CLUSTER_DISCOVERY=dns
+      - EMQX_CLUSTER_DNS_NAME=emqx.internal
+      - EMQX_NODE_COOKIE=secretcookie123
     networks:
       emqx_net:
         aliases:
