@@ -1,13 +1,13 @@
-version: '3'
+version: '3.8'
 
 services:
   emqx1:
     image: emqx/emqx-enterprise:6.0.1
     container_name: emqx1
     environment:
-    - "EMQX_NODE_NAME=emqx@node1.emqx.com"
-    - "EMQX_CLUSTER__DISCOVERY_STRATEGY=static"
-    - "EMQX_CLUSTER__STATIC__SEEDS=[emqx@node1.emqx.com,emqx@node2.emqx.com]"
+      - EMQX_NODE_NAME=emqx@emqx1.emqx.internal
+      - EMQX_CLUSTER__DISCOVERY_STRATEGY=dns
+      - EMQX_CLUSTER__DNS__NAME=emqx.emqx.internal
     healthcheck:
       test: ["CMD", "/opt/emqx/bin/emqx", "ctl", "status"]
       interval: 5s
@@ -16,23 +16,24 @@ services:
     networks:
       emqx-bridge:
         aliases:
-        - node1.emqx.com
+          - emqx1.emqx.internal
+          - emqx.emqx.internal
     ports:
       - 1883:1883
       - 8083:8083
       - 8084:8084
       - 8883:8883
       - 18083:18083
-    # volumes:
-    #   - $PWD/emqx1_data:/opt/emqx/data
+    volumes:
+      - ./emqx1_data:/opt/emqx/data
 
   emqx2:
     image: emqx/emqx-enterprise:6.0.1
     container_name: emqx2
     environment:
-    - "EMQX_NODE_NAME=emqx@node2.emqx.com"
-    - "EMQX_CLUSTER__DISCOVERY_STRATEGY=static"
-    - "EMQX_CLUSTER__STATIC__SEEDS=[emqx@node1.emqx.com,emqx@node2.emqx.com]"
+      - EMQX_NODE_NAME=emqx@emqx2.emqx.internal
+      - EMQX_CLUSTER__DISCOVERY_STRATEGY=dns
+      - EMQX_CLUSTER__DNS__NAME=emqx.emqx.internal
     healthcheck:
       test: ["CMD", "/opt/emqx/bin/emqx", "ctl", "status"]
       interval: 5s
@@ -41,9 +42,30 @@ services:
     networks:
       emqx-bridge:
         aliases:
-        - node2.emqx.com
-    # volumes:
-    #   - $PWD/emqx2_data:/opt/emqx/data
+          - emqx2.emqx.internal
+          - emqx.emqx.internal
+    volumes:
+      - ./emqx2_data:/opt/emqx/data
+
+  emqx3:
+    image: emqx/emqx-enterprise:6.0.1
+    container_name: emqx3
+    environment:
+      - EMQX_NODE_NAME=emqx@emqx3.emqx.internal
+      - EMQX_CLUSTER__DISCOVERY_STRATEGY=dns
+      - EMQX_CLUSTER__DNS__NAME=emqx.emqx.internal
+    healthcheck:
+      test: ["CMD", "/opt/emqx/bin/emqx", "ctl", "status"]
+      interval: 5s
+      timeout: 25s
+      retries: 5
+    networks:
+      emqx-bridge:
+        aliases:
+          - emqx3.emqx.internal
+          - emqx.emqx.internal
+    volumes:
+      - ./emqx3_data:/opt/emqx/data
 
 networks:
   emqx-bridge:
