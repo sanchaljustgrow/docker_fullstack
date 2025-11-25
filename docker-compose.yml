@@ -1,75 +1,51 @@
-version: "3.8"
-
 services:
   emqx1:
     image: emqx/emqx-enterprise:6.0.1
     container_name: emqx1
-    environment:
-      - EMQX_NODE__COOKIE=secretcookie123
-      - EMQX_NODE_NAME=emqx@emqx1.emqx.internal
-      - EMQX_CLUSTER__DISCOVERY_STRATEGY=dns
-      - EMQX_CLUSTER__DNS__NAME=emqx.emqx.internal
     networks:
       emqx-net:
-        aliases:
-          - emqx1.emqx.internal
-          - emqx.emqx.internal
-    ports:
-      - 1883:1883
-      - 8083:8083
-      - 8084:8084
-      - 8883:8883
-      - 18083:18083
+        ipv4_address: 172.20.0.11
+    environment:
+      EMQX_NODE__NAME: emqx1@172.20.0.11
+      EMQX_NODE__COOKIE: secretcookie
+      EMQX_CLUSTER__DISCOVERY_STRATEGY: dns
+      EMQX_CLUSTER__DNS__NAME: emqx.emqx.internal
+      EMQX_CLUSTER__DNS__RECORD_TYPE: a
     volumes:
       - ./emqx1_data:/opt/emqx/data
-    healthcheck:
-      test: ["CMD", "/opt/emqx/bin/emqx", "ctl", "status"]
-      interval: 5s
-      timeout: 25s
-      retries: 5
 
   emqx2:
     image: emqx/emqx-enterprise:6.0.1
     container_name: emqx2
-    environment:
-      - EMQX_NODE__COOKIE=secretcookie123
-      - EMQX_NODE_NAME=emqx@emqx2.emqx.internal
-      - EMQX_CLUSTER__DISCOVERY_STRATEGY=dns
-      - EMQX_CLUSTER__DNS__NAME=emqx.emqx.internal
     networks:
       emqx-net:
-        aliases:
-          - emqx2.emqx.internal
-          - emqx.emqx.internal
+        ipv4_address: 172.20.0.12
+    environment:
+      EMQX_NODE__NAME: emqx2@172.20.0.12
+      EMQX_NODE__COOKIE: secretcookie
+      EMQX_CLUSTER__DISCOVERY_STRATEGY: dns
+      EMQX_CLUSTER__DNS__NAME: emqx.emqx.internal
+      EMQX_CLUSTER__DNS__RECORD_TYPE: a
     volumes:
       - ./emqx2_data:/opt/emqx/data
-    healthcheck:
-      test: ["CMD", "/opt/emqx/bin/emqx", "ctl", "status"]
-      interval: 5s
-      timeout: 25s
-      retries: 5
 
   emqx3:
     image: emqx/emqx-enterprise:6.0.1
     container_name: emqx3
-    environment:
-      - EMQX_NODE__COOKIE=secretcookie123
-      - EMQX_NODE_NAME=emqx@emqx3.emqx.internal
-      - EMQX_CLUSTER__DISCOVERY_STRATEGY=dns
-      - EMQX_CLUSTER__DNS__NAME=emqx.emqx.internal
     networks:
       emqx-net:
-        aliases:
-          - emqx3.emqx.internal
-          - emqx.emqx.internal
+        ipv4_address: 172.20.0.13
+    environment:
+      EMQX_NODE__NAME: emqx3@172.20.0.13
+      EMQX_NODE__COOKIE: secretcookie
+      EMQX_CLUSTER__DISCOVERY_STRATEGY: dns
+      EMQX_CLUSTER__DNS__NAME: emqx.emqx.internal
+      EMQX_CLUSTER__DNS__RECORD_TYPE: a
     volumes:
       - ./emqx3_data:/opt/emqx/data
-    healthcheck:
-      test: ["CMD", "/opt/emqx/bin/emqx", "ctl", "status"]
-      interval: 5s
-      timeout: 25s
-      retries: 5
 
 networks:
   emqx-net:
-    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
