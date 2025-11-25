@@ -4,16 +4,18 @@ services:
   emqx1:
     image: emqx/emqx:5.8.0
     container_name: emqx1
-    hostname: emqx1
+    hostname: emqx1.emqx.local
     environment:
       - EMQX_NODE__NAME=emqx1@emqx1.emqx.local
-      - EMQX_NODE__COOKIE=secretcookie123
+      - EMQX_NODE__COOKIE=secretcookie
       - EMQX_CLUSTER__DISCOVERY_STRATEGY=dns
       - EMQX_CLUSTER__DNS__NAME=emqx.local
-      - EMQX_CLUSTER__DNS__RECORD_TYPE=srv         
+      - EMQX_CLUSTER__DNS__RECORD_TYPE=srv
+      - EMQX_RPC__PORT_DISCOVERY=manual
     networks:
-      emqx:
+      emqx-net:
         aliases:
+          - emqx1.emqx.local
           - emqx.local
     ports:
       - "1883:1883"
@@ -25,33 +27,37 @@ services:
   emqx2:
     image: emqx/emqx:5.8.0
     container_name: emqx2
-    hostname: emqx2
+    hostname: emqx2.emqx.local
     environment:
       - EMQX_NODE__NAME=emqx2@emqx2.emqx.local
-      - EMQX_NODE__COOKIE=secretcookie123
+      - EMQX_NODE__COOKIE=secretcookie
       - EMQX_CLUSTER__DISCOVERY_STRATEGY=dns
       - EMQX_CLUSTER__DNS__NAME=emqx.local
-      - EMQX_CLUSTER__DNS__RECORD_TYPE=a
+      - EMQX_CLUSTER__DNS__RECORD_TYPE=srv
+      - EMQX_RPC__PORT_DISCOVERY=manual
     networks:
-      emqx:
+      emqx-net:
         aliases:
+          - emqx2.emqx.local
           - emqx.local
 
   emqx3:
     image: emqx/emqx:5.8.0
     container_name: emqx3
-    hostname: emqx3
+    hostname: emqx3.emqx.local
     environment:
       - EMQX_NODE__NAME=emqx3@emqx3.emqx.local
-      - EMQX_NODE__COOKIE=secretcookie123
+      - EMQX_NODE__COOKIE=secretcookie
       - EMQX_CLUSTER__DISCOVERY_STRATEGY=dns
       - EMQX_CLUSTER__DNS__NAME=emqx.local
-      - EMQX_CLUSTER__DNS__RECORD_TYPE=a
+      - EMQX_CLUSTER__DNS__RECORD_TYPE=srv
+      - EMQX_RPC__PORT_DISCOVERY=manual
     networks:
-      emqx:
+      emqx-net:
         aliases:
+          - emqx3.emqx.local
           - emqx.local
 
 networks:
-  emqx:
+  emqx-net:
     driver: bridge
