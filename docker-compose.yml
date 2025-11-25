@@ -1,69 +1,57 @@
+version: "3.9"
+
 services:
   emqx1:
     image: emqx/emqx:5.8.0
     container_name: emqx1
-    restart: always
-    networks:
-      emqx-net:
-        ipv4_address: 172.20.0.11
+    hostname: emqx1
     environment:
-      EMQX_NODE__NAME: emqx1@172.20.0.11
-      EMQX_CLUSTER__DISCOVERY_STRATEGY: dns
-      EMQX_CLUSTER__DNS__NAME: emqx.local
-      EMQX_CLUSTER__DNS__RECORD_TYPE: a
-    volumes:
-      - ./emqx1_data:/opt/emqx/data
-    extra_hosts:
-      - "emqx.local:172.20.0.11"
-      - "emqx.local:172.20.0.12"
-      - "emqx.local:172.20.0.13"
+      - EMQX_NODE__NAME=emqx1@emqx1.emqx.local
+      - EMQX_NODE__COOKIE=secretcookie123
+      - EMQX_CLUSTER__DISCOVERY_STRATEGY=dns
+      - EMQX_CLUSTER__DNS__NAME=emqx.local
+      - EMQX_CLUSTER__DNS__RECORD_TYPE=a
+    networks:
+      emqx:
+        aliases:
+          - emqx.local
     ports:
       - "1883:1883"
       - "8083:8083"
+      - "8084:8084"
       - "8883:8883"
       - "18083:18083"
 
   emqx2:
     image: emqx/emqx:5.8.0
     container_name: emqx2
-    restart: always
-    networks:
-      emqx-net:
-        ipv4_address: 172.20.0.12
+    hostname: emqx2
     environment:
-      EMQX_NODE__NAME: emqx2@172.20.0.12
-      EMQX_CLUSTER__DISCOVERY_STRATEGY: dns
-      EMQX_CLUSTER__DNS__NAME: emqx.local
-      EMQX_CLUSTER__DNS__RECORD_TYPE: a
-    volumes:
-      - ./emqx2_data:/opt/emqx/data
-    extra_hosts:
-      - "emqx.local:172.20.0.11"
-      - "emqx.local:172.20.0.12"
-      - "emqx.local:172.20.0.13"
+      - EMQX_NODE__NAME=emqx2@emqx2.emqx.local
+      - EMQX_NODE__COOKIE=secretcookie123
+      - EMQX_CLUSTER__DISCOVERY_STRATEGY=dns
+      - EMQX_CLUSTER__DNS__NAME=emqx.local
+      - EMQX_CLUSTER__DNS__RECORD_TYPE=a
+    networks:
+      emqx:
+        aliases:
+          - emqx.local
 
   emqx3:
     image: emqx/emqx:5.8.0
     container_name: emqx3
-    restart: always
-    networks:
-      emqx-net:
-        ipv4_address: 172.20.0.13
+    hostname: emqx3
     environment:
-      EMQX_NODE__NAME: emqx3@172.20.0.13
-      EMQX_CLUSTER__DISCOVERY_STRATEGY: dns
-      EMQX_CLUSTER__DNS__NAME: emqx.local
-      EMQX_CLUSTER__DNS__RECORD_TYPE: a
-    volumes:
-      - ./emqx3_data:/opt/emqx/data
-    extra_hosts:
-      - "emqx.local:172.20.0.11"
-      - "emqx.local:172.20.0.12"
-      - "emqx.local:172.20.0.13"
+      - EMQX_NODE__NAME=emqx3@emqx3.emqx.local
+      - EMQX_NODE__COOKIE=secretcookie123
+      - EMQX_CLUSTER__DISCOVERY_STRATEGY=dns
+      - EMQX_CLUSTER__DNS__NAME=emqx.local
+      - EMQX_CLUSTER__DNS__RECORD_TYPE=a
+    networks:
+      emqx:
+        aliases:
+          - emqx.local
 
 networks:
-  emqx-net:
-    name: emqx-net
-    ipam:
-      config:
-        - subnet: 172.20.0.0/16
+  emqx:
+    driver: bridge
