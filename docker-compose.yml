@@ -1,20 +1,16 @@
-version: '3.8'
+version: "3.8"
 
 services:
   emqx1:
     image: emqx/emqx-enterprise:6.0.1
     container_name: emqx1
     environment:
+      - EMQX_NODE__COOKIE=secretcookie123
       - EMQX_NODE_NAME=emqx@emqx1.emqx.internal
       - EMQX_CLUSTER__DISCOVERY_STRATEGY=dns
       - EMQX_CLUSTER__DNS__NAME=emqx.emqx.internal
-    healthcheck:
-      test: ["CMD", "/opt/emqx/bin/emqx", "ctl", "status"]
-      interval: 5s
-      timeout: 25s
-      retries: 5
     networks:
-      emqx-bridge:
+      emqx-net:
         aliases:
           - emqx1.emqx.internal
           - emqx.emqx.internal
@@ -26,47 +22,54 @@ services:
       - 18083:18083
     volumes:
       - ./emqx1_data:/opt/emqx/data
+    healthcheck:
+      test: ["CMD", "/opt/emqx/bin/emqx", "ctl", "status"]
+      interval: 5s
+      timeout: 25s
+      retries: 5
 
   emqx2:
     image: emqx/emqx-enterprise:6.0.1
     container_name: emqx2
     environment:
+      - EMQX_NODE__COOKIE=secretcookie123
       - EMQX_NODE_NAME=emqx@emqx2.emqx.internal
       - EMQX_CLUSTER__DISCOVERY_STRATEGY=dns
       - EMQX_CLUSTER__DNS__NAME=emqx.emqx.internal
-    healthcheck:
-      test: ["CMD", "/opt/emqx/bin/emqx", "ctl", "status"]
-      interval: 5s
-      timeout: 25s
-      retries: 5
     networks:
-      emqx-bridge:
+      emqx-net:
         aliases:
           - emqx2.emqx.internal
           - emqx.emqx.internal
     volumes:
       - ./emqx2_data:/opt/emqx/data
-
-  emqx3:
-    image: emqx/emqx-enterprise:6.0.1
-    container_name: emqx3
-    environment:
-      - EMQX_NODE_NAME=emqx@emqx3.emqx.internal
-      - EMQX_CLUSTER__DISCOVERY_STRATEGY=dns
-      - EMQX_CLUSTER__DNS__NAME=emqx.emqx.internal
     healthcheck:
       test: ["CMD", "/opt/emqx/bin/emqx", "ctl", "status"]
       interval: 5s
       timeout: 25s
       retries: 5
+
+  emqx3:
+    image: emqx/emqx-enterprise:6.0.1
+    container_name: emqx3
+    environment:
+      - EMQX_NODE__COOKIE=secretcookie123
+      - EMQX_NODE_NAME=emqx@emqx3.emqx.internal
+      - EMQX_CLUSTER__DISCOVERY_STRATEGY=dns
+      - EMQX_CLUSTER__DNS__NAME=emqx.emqx.internal
     networks:
-      emqx-bridge:
+      emqx-net:
         aliases:
           - emqx3.emqx.internal
           - emqx.emqx.internal
     volumes:
       - ./emqx3_data:/opt/emqx/data
+    healthcheck:
+      test: ["CMD", "/opt/emqx/bin/emqx", "ctl", "status"]
+      interval: 5s
+      timeout: 25s
+      retries: 5
 
 networks:
-  emqx-bridge:
+  emqx-net:
     driver: bridge
