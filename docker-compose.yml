@@ -2,50 +2,53 @@ version: "3.9"
 
 services:
   emqx1:
-    image: emqx:5.7.0
+    image: emqx/emqx:5.8
     container_name: emqx1
-    hostname: emqx1
-    networks:
-      emqx-net: {}
-    dns:
-      - 127.0.0.11
     environment:
-      - EMQX_NODE__NAME=emqx1@emqx1.emqx.local
+      - EMQX_NODE__NAME=emqx1@172.20.0.11
       - EMQX_CLUSTER__DISCOVERY_STRATEGY=dns
       - EMQX_CLUSTER__DNS__NAME=emqx.local
+      - EMQX_CLUSTER__DNS__RECORD_TYPE=a
+      - EMQX_NODE__COOKIE=mysecretcookie
     volumes:
       - ./data/emqx1:/opt/emqx/data
+    networks:
+      emqx-net:
+        ipv4_address: 172.20.0.11
 
   emqx2:
-    image: emqx:5.7.0
+    image: emqx/emqx:5.8
     container_name: emqx2
-    hostname: emqx2
-    networks:
-      emqx-net: {}
-    dns:
-      - 127.0.0.11
     environment:
-      - EMQX_NODE__NAME=emqx2@emqx2.emqx.local
+      - EMQX_NODE__NAME=emqx2@172.20.0.12
       - EMQX_CLUSTER__DISCOVERY_STRATEGY=dns
       - EMQX_CLUSTER__DNS__NAME=emqx.local
+      - EMQX_CLUSTER__DNS__RECORD_TYPE=a
+      - EMQX_NODE__COOKIE=mysecretcookie
     volumes:
       - ./data/emqx2:/opt/emqx/data
+    networks:
+      emqx-net:
+        ipv4_address: 172.20.0.12
 
   emqx3:
-    image: emqx:5.7.0
+    image: emqx/emqx:5.8
     container_name: emqx3
-    hostname: emqx3
-    networks:
-      emqx-net: {}
-    dns:
-      - 127.0.0.11
     environment:
-      - EMQX_NODE__NAME=emqx3@emqx3.emqx.local
+      - EMQX_NODE__NAME=emqx3@172.20.0.13
       - EMQX_CLUSTER__DISCOVERY_STRATEGY=dns
       - EMQX_CLUSTER__DNS__NAME=emqx.local
+      - EMQX_CLUSTER__DNS__RECORD_TYPE=a
+      - EMQX_NODE__COOKIE=mysecretcookie
     volumes:
       - ./data/emqx3:/opt/emqx/data
+    networks:
+      emqx-net:
+        ipv4_address: 172.20.0.13
 
 networks:
   emqx-net:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
