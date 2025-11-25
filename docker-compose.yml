@@ -10,7 +10,7 @@ services:
       - EMQX_NODE__COOKIE=secretcookie123
       - EMQX_CLUSTER__DISCOVERY_STRATEGY=dns
       - EMQX_CLUSTER__DNS__NAME=emqx.local
-      - EMQX_CLUSTER__DNS__RECORD_TYPE=a
+      - EMQX_CLUSTER__DNS__RECORD_TYPE=srv         
     networks:
       emqx:
         aliases:
