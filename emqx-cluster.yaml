@@ -7,8 +7,8 @@ image:
 service:
   type: NodePort
   ports:
-    mqtt: 30083       # NodePort for 1883
-    dashboard: 31083  # NodePort for 18083
+    mqtt: 30083
+    dashboard: 31083
 
 env:
   EMQX_CLUSTER__DISCOVERY: "k8s"
