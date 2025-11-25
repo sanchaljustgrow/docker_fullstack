@@ -1,62 +1,89 @@
-version: "3.9"
+version: '3.9'
 
 services:
+
+  # ---------------------
+  # Local DNS Server
+  # ---------------------
+  dns:
+    image: andyshinn/dnsmasq:2.85
+    container_name: dns
+    command: >
+      --log-facility=-
+      --server=127.0.0.11
+      --address=/emqx.local/127.0.0.1
+      --srv-host=_emqx._tcp.emqx.local,emqx1.emqx.local,1883,10
+      --srv-host=_emqx._tcp.emqx.local,emqx2.emqx.local,1883,10
+      --srv-host=_emqx._tcp.emqx.local,emqx3.emqx.local,1883,10
+    cap_add:
+      - NET_ADMIN
+    networks:
+      emqx-net:
+        aliases:
+          - emqx.local
+
+  # ----------------------------------------------------
+  # EMQX Node 1
+  # ----------------------------------------------------
   emqx1:
     image: emqx/emqx:5.8.0
     container_name: emqx1
     hostname: emqx1.emqx.local
+    depends_on:
+      - dns
     environment:
       - EMQX_NODE__NAME=emqx1@emqx1.emqx.local
       - EMQX_NODE__COOKIE=secretcookie
       - EMQX_CLUSTER__DISCOVERY_STRATEGY=dns
-      - EMQX_CLUSTER__DNS__NAME=emqx.local
+      - EMQX_CLUSTER__DNS__NAME=_emqx._tcp.emqx.local
       - EMQX_CLUSTER__DNS__RECORD_TYPE=srv
-      - EMQX_RPC__PORT_DISCOVERY=manual
     networks:
       emqx-net:
-        aliases:
-          - emqx1.emqx.local
-          - emqx.local
+        dns:
+          - 127.0.0.1
     ports:
       - "1883:1883"
-      - "8083:8083"
-      - "8084:8084"
-      - "8883:8883"
       - "18083:18083"
 
+  # ----------------------------------------------------
+  # EMQX Node 2
+  # ----------------------------------------------------
   emqx2:
     image: emqx/emqx:5.8.0
     container_name: emqx2
     hostname: emqx2.emqx.local
+    depends_on:
+      - dns
     environment:
       - EMQX_NODE__NAME=emqx2@emqx2.emqx.local
       - EMQX_NODE__COOKIE=secretcookie
       - EMQX_CLUSTER__DISCOVERY_STRATEGY=dns
-      - EMQX_CLUSTER__DNS__NAME=emqx.local
+      - EMQX_CLUSTER__DNS__NAME=_emqx._tcp.emqx.local
       - EMQX_CLUSTER__DNS__RECORD_TYPE=srv
-      - EMQX_RPC__PORT_DISCOVERY=manual
     networks:
       emqx-net:
-        aliases:
-          - emqx2.emqx.local
-          - emqx.local
+        dns:
+          - 127.0.0.1
 
+  # ----------------------------------------------------
+  # EMQX Node 3
+  # ----------------------------------------------------
   emqx3:
     image: emqx/emqx:5.8.0
     container_name: emqx3
     hostname: emqx3.emqx.local
+    depends_on:
+      - dns
     environment:
       - EMQX_NODE__NAME=emqx3@emqx3.emqx.local
       - EMQX_NODE__COOKIE=secretcookie
       - EMQX_CLUSTER__DISCOVERY_STRATEGY=dns
-      - EMQX_CLUSTER__DNS__NAME=emqx.local
+      - EMQX_CLUSTER__DNS__NAME=_emqx._tcp.emqx.local
       - EMQX_CLUSTER__DNS__RECORD_TYPE=srv
-      - EMQX_RPC__PORT_DISCOVERY=manual
     networks:
       emqx-net:
-        aliases:
-          - emqx3.emqx.local
-          - emqx.local
+        dns:
+          - 127.0.0.1
 
 networks:
   emqx-net:
