@@ -2,31 +2,26 @@ replicaCount: 3
 
 image:
   repository: emqx/emqx
+  tag: 5.7.2
   pullPolicy: IfNotPresent
 
 service:
-  type: NodePort
-  mqtt: 1883
-  mqttssl: 8883
-  ws: 8083
-  wss: 8084
-  dashboard: 18083
-
-  nodePorts:
-    mqtt: 30183
-    mqttssl: 30443
-    #ws: 30803
-    #wss: 31084
-    dashboard: 31803
-
-persistence:
-  enabled: true
-  size: 1Gi
-
-ssl:
-  enabled: false
+  type: ClusterIP
+  ports:
+    mqtt: 1883
+    dashboard: 18083
 
 emqxConfig:
-  cluster.name: "kind-emqx"
-  listeners.tcp.default.acceptors: 64
-  listeners.ssl.default.enable: "false"
+  EMQX_CLUSTER__DISCOVERY: "dns"
+  EMQX_CLUSTER__DNS__NAME: "my-emqx-headless.default.svc.cluster.local"
+
+persistence:
+  enabled: false  # KIND does not support default PVC well
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 200m
+    memory: 256Mi
