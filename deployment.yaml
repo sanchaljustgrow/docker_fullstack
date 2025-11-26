@@ -34,10 +34,17 @@ spec:
         ports:
         - containerPort: 1883
         - containerPort: 18083
-        env:
+          env:
+        - name: EMQX_NAME
+          value: emqx
         - name: EMQX_CLUSTER__DISCOVERY
           value: kubernetes
-        - name: EMQX_CLUSTER__K8S__SERVICE_NAME
+        - name: EMQX_CLUSTER__K8S__APP_NAME
           value: emqx
+        - name: EMQX_CLUSTER__K8S__SERVICE_NAME
+          value: emqx-service
+        - name: EMQX_CLUSTER__K8S__APISERVER
+          value: "https://kubernetes.default.svc:443"
         - name: EMQX_CLUSTER__K8S__NAMESPACE
           value: default
+
