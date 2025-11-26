@@ -1,29 +1,36 @@
+$ cat rbac.yaml
+
 apiVersion: v1
 kind: ServiceAccount
 metadata:
+  namespace: default
   name: emqx
-  namespace: emqx
 ---
 kind: Role
-apiVersion: rbac.authorization.k8s.io/v1
+apiVersion: rbac.authorization.kubernetes.io/v1beta1
 metadata:
+  namespace: default
   name: emqx
-  namespace: emqx
 rules:
-- apiGroups: [""]
-  resources: ["endpoints"]
-  verbs: ["get", "watch", "list"]
+- apiGroups:
+  - ""
+  resources:
+  - endpoints 
+  verbs: 
+  - get
+  - watch
+  - list
 ---
 kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
+apiVersion: rbac.authorization.kubernetes.io/v1beta1
 metadata:
+  namespace: default
   name: emqx
-  namespace: emqx
 subjects:
-- kind: ServiceAccount
-  name: emqx
-  namespace: emqx
+  - kind: ServiceAccount
+    name: emqx
+    namespace: default
 roleRef:
-  apiGroup: rbac.authorization.k8s.io
   kind: Role
   name: emqx
+  apiGroup: rbac.authorization.kubernetes.io
