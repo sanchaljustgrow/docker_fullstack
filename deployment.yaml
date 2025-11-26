@@ -1,5 +1,3 @@
-$ cat deployment.yaml
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -7,7 +5,7 @@ metadata:
   labels:
     app: emqx
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: emqx
@@ -32,3 +30,16 @@ spec:
           containerPort: 8084
         - name: dashboard
           containerPort: 18083
+        env:
+        - name: EMQX_NAME
+          value: emqx
+        - name: EMQX_CLUSTER__DISCOVERY
+          value: k8s
+        - name: EMQX_CLUSTER__K8S__APP_NAME
+          value: emqx
+        - name: EMQX_CLUSTER__K8S__SERVICE_NAME
+          value: emqx-service
+        - name: EMQX_CLUSTER__K8S__APISERVER
+          value: "https://kubernetes.default.svc:443"
+        - name: EMQX_CLUSTER__K8S__NAMESPACE
+          value: default
