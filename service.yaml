@@ -1,14 +1,34 @@
+$cat service.yaml
+
 apiVersion: v1
 kind: Service
 metadata:
-  name: emqx
-  namespace: emqx
+  name: emqx-service
 spec:
-  clusterIP: None     # HEADLESS — required for pod DNS
   selector:
     app: emqx
   ports:
-  - name: mqtt
-    port: 1883
-  - name: dashboard
-    port: 18083
+    - name: mqtt
+      port: 1883
+      protocol: TCP
+      targetPort: mqtt
+    - name: mqttssl
+      port: 8883
+      protocol: TCP
+      targetPort: mqttssl
+    - name: mgmt
+      port: 8081
+      protocol: TCP
+      targetPort: mgmt
+    - name: ws
+      port: 8083
+      protocol: TCP
+      targetPort: ws
+    - name: wss
+      port: 8084
+      protocol: TCP
+      targetPort: wss
+    - name: dashboard
+      port: 18083
+      protocol: TCP
+      targetPort: dashboard
