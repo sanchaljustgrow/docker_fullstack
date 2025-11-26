@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: emqx
+  namespace: emqx
+  labels:
+    app: emqx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: emqx
+  template:
+    metadata:
+      labels:
+        app: emqx
+    spec:
+      serviceAccountName: emqx
+      containers:
+      - name: emqx
+        image: emqx/emqx:5.6.0
+        ports:
+        - containerPort: 1883
+        - containerPort: 8883
+        - containerPort: 8081
+        - containerPort: 8083
+        - containerPort: 8084
+        - containerPort: 18083
+        env:
+        - name: EMQX_NAME
+          value: "emqx"
+        - name: EMQX_CLUSTER__DISCOVERY
+          value: "kubernetes"
+        - name: EMQX_CLUSTER__K8S__APP_NAME
+          value: "emqx"
+        - name: EMQX_CLUSTER__K8S__SERVICE_NAME
+          value: "emqx"
+        - name: EMQX_CLUSTER__K8S__NAMESPACE
+          value: "emqx"
+        - name: EMQX_CLUSTER__K8S__ADDRESS_TYPE
+          value: "ip"
