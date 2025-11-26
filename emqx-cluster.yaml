@@ -1,0 +1,32 @@
+apiVersion: apps.emqx.io/v2alpha1
+kind: EMQX
+metadata:
+  name: emqx-cluster
+  namespace: emqx
+spec:
+  image: emqx:5.7.1
+
+  # --- CLUSTER SIZE ---
+  replicas: 3
+
+  # --- CLUSTER PERSISTENCE ---
+  persistence:
+    enabled: true
+    storageClass: gp2    # for EKS use gp2/gp3, for minikube use standard
+    resources:
+      requests:
+        storage: 5Gi
+
+  # --- SERVICE ---
+  listenersServiceTemplate:
+    metadata:
+      name: emqx
+    spec:
+      type: LoadBalancer   # or NodePort
+  # Ports: 1883, 8083, 8883, 18083 automatically exposed
+
+  # --- EMQX CONFIG ---
+  config:
+    EMQX_CLUSTER__DISCOVERY: "k8s"
+    EMQX_CLUSTER__K8S__APP_NAME: "emqx-cluster"
+    EMQX_CLUSTER__K8S__NAMESPACE: "emqx"
