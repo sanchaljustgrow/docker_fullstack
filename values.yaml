@@ -2,13 +2,16 @@ replicaCount: 3
 
 node:
   name: emqx
-  cookie: "EMQXCOOKIE123"   # Same for all nodes
+  cookie: "EMQXCOOKIE123"   # Must be the same for all nodes
 
 cluster:
   enabled: true
   k8s:
     enabled: true
-    selector: "app=emqx"
+    selector: "app.kubernetes.io/instance=my-emqx"  # Match Helm chart label
+    serviceName: "my-emqx-emqx-enterprise-headless" # Headless service name (auto-created by chart)
+    recordType: "srv"
+    discoveryStrategy: "dns"
 
 service:
   type: ClusterIP
@@ -18,6 +21,8 @@ dashboard:
   enabled: true
   service:
     type: ClusterIP
+  defaultUsername: admin
+  defaultPassword: public
 
 resources:
   requests:
@@ -26,3 +31,8 @@ resources:
   limits:
     cpu: 500m
     memory: 512Mi
+
+persistence:
+  enabled: true
+  size: 1Gi
+  storageClass: ""   # Leave empty for default StorageClass on local cluster
