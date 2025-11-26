@@ -4,31 +4,30 @@ metadata:
   namespace: default
   name: emqx
 ---
+apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
-apiVersion: rbac.authorization.kubernetes.io/v1beta1
 metadata:
   namespace: default
-  name: emqx
+  name: emqx-role
 rules:
-- apiGroups:
-  - ""
+- apiGroups: [""]
   resources:
-  - endpoints 
-  verbs: 
+  - endpoints
+  verbs:
   - get
   - watch
   - list
 ---
+apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
-apiVersion: rbac.authorization.kubernetes.io/v1beta1
 metadata:
   namespace: default
-  name: emqx
+  name: emqx-rolebinding
 subjects:
-  - kind: ServiceAccount
-    name: emqx
-    namespace: default
+- kind: ServiceAccount
+  name: emqx
+  namespace: default
 roleRef:
   kind: Role
-  name: emqx
-  apiGroup: rbac.authorization.kubernetes.io
+  name: emqx-role
+  apiGroup: rbac.authorization.k8s.io
