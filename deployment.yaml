@@ -31,6 +31,8 @@ spec:
         - name: cluster
           containerPort: 4370
         env:
+        - name: EMQX_NODE__COOKIE
+          value: "MYSECRETCOOKIE"   # <-- Must be the same for all pods
         - name: EMQX_CLUSTER__DISCOVERY
           value: "kubernetes"
         - name: EMQX_CLUSTER__K8S__NAMESPACE
