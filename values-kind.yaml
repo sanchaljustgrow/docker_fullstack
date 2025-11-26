@@ -1,0 +1,32 @@
+replicaCount: 3
+
+image:
+  repository: emqx/emqx
+  pullPolicy: IfNotPresent
+
+service:
+  type: NodePort
+  mqtt: 1883
+  mqttssl: 8883
+  ws: 8083
+  wss: 8084
+  dashboard: 18083
+
+  nodePorts:
+    mqtt: 30183
+    mqttssl: 30443
+    #ws: 30803
+    #wss: 31084
+    dashboard: 31803
+
+persistence:
+  enabled: true
+  size: 1Gi
+
+ssl:
+  enabled: false
+
+emqxConfig:
+  cluster.name: "kind-emqx"
+  listeners.tcp.default.acceptors: 64
+  listeners.ssl.default.enable: "false"
