@@ -1,38 +1,52 @@
-replicaCount: 3
+skipCRDs: false
+singleNamespace: false
+development: false
+replicaCount: 1
+revisionHistoryLimit: 10
 
-node:
-  name: emqx
-  cookie: "EMQXCOOKIE123"   # Must be the same for all nodes
+image:
+  repository: emqx/emqx-operator-controller
+  pullPolicy: IfNotPresent
+  tag: "2.2.28"
 
-cluster:
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+webhook:
   enabled: true
-  k8s:
-    enabled: true
-    selector: "app.kubernetes.io/instance=my-emqx"  # Match Helm chart label
-    serviceName: "my-emqx-emqx-enterprise-headless" # Headless service name (auto-created by chart)
-    recordType: "srv"
-    discoveryStrategy: "dns"
 
-service:
-  type: ClusterIP
-  name: emqx-service
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
 
-dashboard:
-  enabled: true
-  service:
-    type: ClusterIP
-  defaultUsername: admin
-  defaultPassword: public
+podAnnotations: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+
+containerSecurityContext:
+  allowPrivilegeEscalation: false
 
 resources:
-  requests:
-    cpu: 250m
-    memory: 256Mi
   limits:
     cpu: 500m
     memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
 
-persistence:
-  enabled: true
-  size: 1Gi
-  storageClass: ""   # Leave empty for default StorageClass on local cluster
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+cert-manager:
+  # Using [cert manager](https://github.com/jetstack/cert-manager) for provisioning the certificates for the webhook server.
+  # You can follow [the cert manager documentation](https://cert-manager.io/docs/installation/) to install it.
+  # Or you can use your own certificate, You need create a TLS secret for provisioning the certificates for the "${FULLNAME}-webhook-service.${NAMESPACE}.svc"
+  enable: true
+  # If not set, a name is generated using the "${FULLNAME}-webhook-server-cert"
+  secretName: ""
