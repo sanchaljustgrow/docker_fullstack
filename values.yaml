@@ -1,88 +1,29 @@
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: emqx
----
-apiVersion: apps.emqx.io/v2beta1
-kind: EMQX
-metadata:
-  name: emqx
-  namespace: emqx
-spec:
-  image: emqx:5
-  imagePullPolicy: IfNotPresent
-  coreTemplate:
-    spec:
-      extraVolumes:
-        - name: emqx-tls
-          secret:
-            secretName: emqx-tls
-      extraVolumeMounts:
-        - name: emqx-tls
-          mountPath: /mounted/cert
-  dashboardServiceTemplate:
-    metadata:
-      name: emqx-dashboard
-    spec:
-      type: LoadBalancer
-  listenersServiceTemplate:
-    metadata:
-      name: emqx-listeners
-    spec:
-      type: NodePort
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: emqx-configs
-  namespace: emqx
-data:
-  emqx.conf: |
-    dashboard.listeners.http.bind = 18083
-    dashboard.default_username = "admin"
-    dashboard.default_password = "emqxpass"
-    sysmon.vm.long_schedule = disabled
-    listeners.ssl.default.bind = 8883
-    listeners.ssl.default.ssl_options.certfile = "/mounted/cert/tls.crt"
-    listeners.ssl.default.ssl_options.keyfile = "/mounted/cert/tls.key"
-    listeners.ssl.default.ssl_options.cacertfile = "/mounted/cert/ca.crt"
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: emqx-tls
-  namespace: emqx
-type: Opaque
-data:
-  # Replace these with your base64-encoded certs
-  ca.crt: LS0tLS1CRU...==
-  tls.crt: LS0tLS1CRU...==
-  tls.key: LS0tLS1CRU...==
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: emqx-mqtt-ingress
-  namespace: emqx
-spec:
-  ingressClassName: nginx
-  rules:
-  - host: emqx-mqtt.local
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: emqx-listeners
-            port:
-              number: 8883
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: tcp-services
-  namespace: ingress
-data:
-  "8883": "emqx/emqx-listeners:8883"
+replicaCount: 3   # Number of nodes in cluster, always odd recommended
+
+image:
+  repository: emqx/emqx-enterprise
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  mqtt: 1883
+  mqttssl: 8883
+  dashboard: 18083
+
+persistence:
+  enabled: false
+
+emqxConfig:
+  EMQX_NAME: "emqx"
+  EMQX_HOST: "0.0.0.0"
+  EMQX_CLUSTER__DISCOVERY: "k8s"
+  EMQX_CLUSTER__K8S__NAMESPACE: "default"
+  EMQX_CLUSTER__K8S__APP_NAME: "my-emqx"
+
+# Enable SSL if needed
+ssl:
+  enabled: false
+
+metrics:
+  enable: true
