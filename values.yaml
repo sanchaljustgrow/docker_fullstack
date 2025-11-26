@@ -1,52 +1,88 @@
-skipCRDs: false
-singleNamespace: false
-development: false
-replicaCount: 1
-revisionHistoryLimit: 10
-
-image:
-  repository: emqx/emqx-operator-controller
-  pullPolicy: IfNotPresent
-  tag: "2.2.28"
-
-imagePullSecrets: []
-nameOverride: ""
-fullnameOverride: ""
-
-webhook:
-  enabled: true
-
-serviceAccount:
-  create: true
-  annotations: {}
-  name: ""
-
-podAnnotations: {}
-
-podSecurityContext:
-  runAsNonRoot: true
-
-containerSecurityContext:
-  allowPrivilegeEscalation: false
-
-resources:
-  limits:
-    cpu: 500m
-    memory: 512Mi
-  requests:
-    cpu: 100m
-    memory: 128Mi
-
-nodeSelector: {}
-
-tolerations: []
-
-affinity: {}
-
-cert-manager:
-  # Using [cert manager](https://github.com/jetstack/cert-manager) for provisioning the certificates for the webhook server.
-  # You can follow [the cert manager documentation](https://cert-manager.io/docs/installation/) to install it.
-  # Or you can use your own certificate, You need create a TLS secret for provisioning the certificates for the "${FULLNAME}-webhook-service.${NAMESPACE}.svc"
-  enable: true
-  # If not set, a name is generated using the "${FULLNAME}-webhook-server-cert"
-  secretName: ""
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: emqx
+---
+apiVersion: apps.emqx.io/v2beta1
+kind: EMQX
+metadata:
+  name: emqx
+  namespace: emqx
+spec:
+  image: emqx:5
+  imagePullPolicy: IfNotPresent
+  coreTemplate:
+    spec:
+      extraVolumes:
+        - name: emqx-tls
+          secret:
+            secretName: emqx-tls
+      extraVolumeMounts:
+        - name: emqx-tls
+          mountPath: /mounted/cert
+  dashboardServiceTemplate:
+    metadata:
+      name: emqx-dashboard
+    spec:
+      type: LoadBalancer
+  listenersServiceTemplate:
+    metadata:
+      name: emqx-listeners
+    spec:
+      type: NodePort
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: emqx-configs
+  namespace: emqx
+data:
+  emqx.conf: |
+    dashboard.listeners.http.bind = 18083
+    dashboard.default_username = "admin"
+    dashboard.default_password = "emqxpass"
+    sysmon.vm.long_schedule = disabled
+    listeners.ssl.default.bind = 8883
+    listeners.ssl.default.ssl_options.certfile = "/mounted/cert/tls.crt"
+    listeners.ssl.default.ssl_options.keyfile = "/mounted/cert/tls.key"
+    listeners.ssl.default.ssl_options.cacertfile = "/mounted/cert/ca.crt"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: emqx-tls
+  namespace: emqx
+type: Opaque
+data:
+  # Replace these with your base64-encoded certs
+  ca.crt: LS0tLS1CRU...==
+  tls.crt: LS0tLS1CRU...==
+  tls.key: LS0tLS1CRU...==
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: emqx-mqtt-ingress
+  namespace: emqx
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: emqx-mqtt.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: emqx-listeners
+            port:
+              number: 8883
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tcp-services
+  namespace: ingress
+data:
+  "8883": "emqx/emqx-listeners:8883"
