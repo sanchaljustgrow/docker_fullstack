@@ -1,0 +1,28 @@
+replicaCount: 3
+
+node:
+  name: emqx
+  cookie: "EMQXCOOKIE123"   # Same for all nodes
+
+cluster:
+  enabled: true
+  k8s:
+    enabled: true
+    selector: "app=emqx"
+
+service:
+  type: ClusterIP
+  name: emqx-service
+
+dashboard:
+  enabled: true
+  service:
+    type: ClusterIP
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
