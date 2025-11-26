@@ -1,32 +1,56 @@
-apiVersion: apps.emqx.io/v2alpha1
+apiVersion: apps.emqx.io/v2beta1
 kind: EMQX
 metadata:
   name: emqx-cluster
   namespace: emqx
 spec:
+  # --------------------------
+  #       EMQX VERSION
+  # --------------------------
   image: emqx:5.7.1
 
-  # --- CLUSTER SIZE ---
-  replicas: 3
+  # --------------------------
+  #       CLUSTER MODE
+  # --------------------------
+  bootstrapConfig:
+    emqx:
+      cluster:
+        discovery: "k8s"
+        k8s:
+          apiserver: https://kubernetes.default.svc
+          namespaceSelector: emqx
+          serviceSelector: emqx-cluster-headless
 
-  # --- CLUSTER PERSISTENCE ---
-  persistence:
-    enabled: true
-    storageClass: gp2    # for EKS use gp2/gp3, for minikube use standard
-    resources:
-      requests:
-        storage: 5Gi
+  # --------------------------
+  #   REPLICAS (CLUSTER SIZE)
+  # --------------------------
+  coreTemplate:
+    spec:
+      replicas: 3
 
-  # --- SERVICE ---
+      # Enable persistence for StatefulSet
+      volumeClaimTemplates:
+      - metadata:
+          name: data
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          storageClassName: standard   # For Minikube/Kind
+          resources:
+            requests:
+              storage: 5Gi
+
+  # --------------------------
+  #      EXPOSE SERVICES
+  # --------------------------
   listenersServiceTemplate:
     metadata:
-      name: emqx
+      name: emqx-service
     spec:
-      type: LoadBalancer   # or NodePort
-  # Ports: 1883, 8083, 8883, 18083 automatically exposed
-
-  # --- EMQX CONFIG ---
-  config:
-    EMQX_CLUSTER__DISCOVERY: "k8s"
-    EMQX_CLUSTER__K8S__APP_NAME: "emqx-cluster"
-    EMQX_CLUSTER__K8S__NAMESPACE: "emqx"
+      type: LoadBalancer
+      ports:
+      - name: mqtt
+        port: 1883
+        targetPort: 1883
+      - name: dashboard
+        port: 18083
+        targetPort: 18083
