@@ -20,22 +20,24 @@ spec:
       - name: emqx
         image: emqx/emqx:5.6.0
         ports:
-        - containerPort: 1883
-        - containerPort: 8883
-        - containerPort: 8081
-        - containerPort: 8083
-        - containerPort: 8084
-        - containerPort: 18083
+        - name: mqtt
+          containerPort: 1883
+        - name: dashboard
+          containerPort: 18083
+        - name: epmd
+          containerPort: 4369
+        - name: rpc
+          containerPort: 5369
+        - name: cluster
+          containerPort: 4370
         env:
-        - name: EMQX_NAME
-          value: "emqx"
         - name: EMQX_CLUSTER__DISCOVERY
           value: "kubernetes"
+        - name: EMQX_CLUSTER__K8S__NAMESPACE
+          value: "emqx"
         - name: EMQX_CLUSTER__K8S__APP_NAME
           value: "emqx"
         - name: EMQX_CLUSTER__K8S__SERVICE_NAME
-          value: "emqx"
-        - name: EMQX_CLUSTER__K8S__NAMESPACE
           value: "emqx"
         - name: EMQX_CLUSTER__K8S__ADDRESS_TYPE
           value: "ip"
