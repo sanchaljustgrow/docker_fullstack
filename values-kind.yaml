@@ -5,18 +5,24 @@ image:
   tag: 5.7.2
   pullPolicy: IfNotPresent
 
+# Use NodePort to access EMQX from host
 service:
-  type: ClusterIP
-  ports:
-    mqtt: 1883
-    dashboard: 18083
+  type: NodePort
+  mqtt: 1883
+  mqttssl: 8883
+  dashboard: 18083
+
+  nodePorts:
+    mqtt: 30183       # local host port for MQTT
+    mqttssl: 30443    # local host port for MQTT SSL
+    dashboard: 31803  # local host port for Dashboard
 
 emqxConfig:
   EMQX_CLUSTER__DISCOVERY: "dns"
   EMQX_CLUSTER__DNS__NAME: "my-emqx-headless.default.svc.cluster.local"
 
 persistence:
-  enabled: false  # KIND does not support default PVC well
+  enabled: false  # KIND does not support PVC well
 
 resources:
   limits:
