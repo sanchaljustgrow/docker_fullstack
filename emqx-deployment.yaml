@@ -1,10 +1,52 @@
-apiVersion: apps/v1
-kind: Deployment
+---
+apiVersion: v1
+kind: Service
 metadata:
-  name: emqx-deployment
+  name: emqx-headless
   labels:
     app: emqx
 spec:
+  clusterIP: None       # headless service for DNS-based discovery
+  selector:
+    app: emqx
+  ports:
+    - name: mqtt
+      port: 1883
+      targetPort: 1883
+    - name: mqtts
+      port: 8883
+      targetPort: 8883
+    - name: dashboard
+      port: 18083
+      targetPort: 18083
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: emqx-loadbalancer
+  labels:
+    app: emqx
+spec:
+  type: LoadBalancer
+  selector:
+    app: emqx
+  ports:
+    - name: mqtt
+      port: 1883
+      targetPort: 1883
+    - name: mqtts
+      port: 8883
+      targetPort: 8883
+    - name: dashboard
+      port: 18083
+      targetPort: 18083
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: emqx
+spec:
+  serviceName: emqx-headless
   replicas: 3
   selector:
     matchLabels:
@@ -16,22 +58,36 @@ spec:
     spec:
       containers:
       - name: emqx
-        image: emqx/emqx:4.4.18
+        image: emqx/emqx:v5.0.7
+        imagePullPolicy: IfNotPresent
         ports:
-        - containerPort: 1883
-        - containerPort: 18083
+          - containerPort: 1883
+          - containerPort: 8883
+          - containerPort: 8083
+          - containerPort: 8084
+          - containerPort: 18083
         env:
-        - name: EMQX_NAME
-          value: emqx
-        - name: EMQX_CLUSTER__DISCOVERY
-          value: kubernetes
-        - name: EMQX_CLUSTER__K8S__APP_NAME
-          value: emqx
-        - name: EMQX_CLUSTER__K8S__SERVICE_NAME
-          value: emqx-headless
-        - name: EMQX_CLUSTER__K8S__ADDRESS_TYPE
-          value: ip
-        - name: EMQX_CLUSTER__K8S__NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
+          # Node name
+          - name: EMQX_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          # Erlang cookie (must be same for all nodes)
+          - name: EMQX_NODE_COOKIE
+            value: "MY_SECRET_COOKIE"
+          # Cluster discovery
+          - name: EMQX_CLUSTER__DISCOVERY
+            value: "dns"
+          - name: EMQX_CLUSTER__DNS__NAME
+            value: "emqx-headless.default.svc.cluster.local"
+        volumeMounts:
+          - name: emqx-data
+            mountPath: /opt/emqx/data
+  volumeClaimTemplates:
+    - metadata:
+        name: emqx-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
