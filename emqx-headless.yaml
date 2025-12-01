@@ -9,5 +9,6 @@ spec:
   selector:
     app: emqx
   ports:
-    - port: 1883
-      name: mqtt
+    - name: mqtt
+      port: 1883
+      targetPort: 1883
