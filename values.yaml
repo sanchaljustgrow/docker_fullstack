@@ -6,7 +6,7 @@ image:
   pullPolicy: IfNotPresent
 
 service:
-  type: NodePort  # Use NodePort instead of LoadBalancer
+  type: NodePort
   externalTrafficPolicy: Cluster
   ports:
     mqtt:
@@ -33,12 +33,17 @@ persistence:
   accessModes: ["ReadWriteOnce"]
 
 emqxConfig:
+  # Node cookie for clustering
   EMQX_NODE__COOKIE: "super-secret-cookie"
+
+  # Kubernetes-based cluster discovery
   EMQX_CLUSTER__DISCOVERY_STRATEGY: "k8s"
   EMQX_CLUSTER__K8S__NAMESPACE: "emqx"
-  EMQX_CLUSTER__K8S__SERVICE_NAME: "my-emqx-headless"  # Match headless service
+  EMQX_CLUSTER__K8S__SERVICE_NAME: "my-emqx-headless"  # Must match headless service
   EMQX_CLUSTER__K8S__SUFFIX: "svc.cluster.local"
   EMQX_CLUSTER__K8S__ADDRESS_TYPE: "ip"
+
+  # Node distribution port
   EMQX_DISTRIBUTION__LISTEN__PORT: "4370"
 
 resources:
