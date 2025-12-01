@@ -1,5 +1,5 @@
 
-replicaCount: 3  # 3 EMQX pods for HA
+replicaCount: 3
 
 image:
   repository: emqx/emqx
@@ -8,51 +8,45 @@ image:
 
 service:
   type: NodePort
-  externalTrafficPolicy: Cluster  # Ensures proper routing for NodePort
+  externalTrafficPolicy: Cluster
   ports:
     mqtt:
       enabled: true
       port: 1883
-      nodePort: 30483    # Explicit NodePort for MQTT
+      nodePort: 30483
     mqtts:
       enabled: true
       port: 8883
-      nodePort: 32426    # Explicit NodePort for MQTT over TLS
+      nodePort: 32426
     ws:
       enabled: true
       port: 8083
-      nodePort: 31816    # Explicit NodePort for WebSocket
+      nodePort: 31816
     dashboard:
       enabled: true
       port: 18083
-      nodePort: 30825    # Explicit NodePort for Dashboard
+      nodePort: 30825
 
 persistence:
   enabled: true
   size: 20Gi
-  storageClass: standard  # Change to your cluster's StorageClass
-  accessModes:
-    - ReadWriteOnce
-
+  storageClass: standard
+  accessModes: ["ReadWriteOnce"]
 
 emqxConfig:
   EMQX_NODE__COOKIE: "super-secret-cookie"
   EMQX_CLUSTER__DISCOVERY_STRATEGY: "k8s"
   EMQX_CLUSTER__K8S__NAMESPACE: "emqx"
   EMQX_CLUSTER__K8S__SERVICE_NAME: "emqx-headless"
+  EMQX_CLUSTER__K8S__SUFFIX: "svc.cluster.local"
   EMQX_CLUSTER__K8S__ADDRESS_TYPE: "ip"
+  # Safety if 4370 isn’t listening by default (usually not needed)
+  EMQX_DISTRIBUTION__LISTEN__PORT: "4370"
 
-
-# Optional: Add resource limits for stability
 resources:
-  requests:
-    cpu: "500m"
-    memory: "1Gi"
-  limits:
-    cpu: "2"
-    memory: "4Gi"
+  requests: { cpu: "500m", memory: "1Gi" }
+  limits:   { cpu: "2",    memory: "4Gi" }
 
-# Health probes (no authentication required)
 livenessProbe:
   enabled: true
   httpGet:
