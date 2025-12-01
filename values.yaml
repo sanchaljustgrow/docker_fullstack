@@ -1,4 +1,3 @@
-
 replicaCount: 3
 
 image:
@@ -7,7 +6,7 @@ image:
   pullPolicy: IfNotPresent
 
 service:
-  type: NodePort
+  type: NodePort  # Use NodePort instead of LoadBalancer
   externalTrafficPolicy: Cluster
   ports:
     mqtt:
@@ -37,15 +36,18 @@ emqxConfig:
   EMQX_NODE__COOKIE: "super-secret-cookie"
   EMQX_CLUSTER__DISCOVERY_STRATEGY: "k8s"
   EMQX_CLUSTER__K8S__NAMESPACE: "emqx"
-  EMQX_CLUSTER__K8S__SERVICE_NAME: "emqx-headless"
+  EMQX_CLUSTER__K8S__SERVICE_NAME: "my-emqx-headless"  # Match headless service
   EMQX_CLUSTER__K8S__SUFFIX: "svc.cluster.local"
   EMQX_CLUSTER__K8S__ADDRESS_TYPE: "ip"
-  # Safety if 4370 isn’t listening by default (usually not needed)
   EMQX_DISTRIBUTION__LISTEN__PORT: "4370"
 
 resources:
-  requests: { cpu: "500m", memory: "1Gi" }
-  limits:   { cpu: "2",    memory: "4Gi" }
+  requests:
+    cpu: "500m"
+    memory: "1Gi"
+  limits:
+    cpu: "2"
+    memory: "4Gi"
 
 livenessProbe:
   enabled: true
