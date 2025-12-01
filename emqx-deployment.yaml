@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: emqx
+  name: emqx-deployment
   labels:
     app: emqx
 spec:
@@ -16,23 +16,32 @@ spec:
     spec:
       serviceAccountName: emqx
       containers:
-        - name: emqx
-          image: emqx/emqx:5.8.0
-          ports:
-            - containerPort: 1883
-            - containerPort: 18083
-            - containerPort: 8081
-          env:
-            - name: CLUSTER__DISCOVERY
-              value: "k8s"
+      - name: emqx
+        image: emqx/emqx:v4.1-rc.1
+        ports:
+        - name: mqtt
+          containerPort: 1883
+        - name: mqttssl
+          containerPort: 8883
+        - name: mgmt
+          containerPort: 8081
+        - name: ws
+          containerPort: 8083
+        - name: wss
+          containerPort: 8084
+        - name: dashboard
+          containerPort: 18083
+        env:
+        - name: EMQX_NAME
+          value: emqx
+        - name: EMQX_CLUSTER__DISCOVERY
+          value: kubernetes
+        - name: EMQX_CLUSTER__K8S__APP_NAME
+          value: emqx
+        - name: EMQX_CLUSTER__K8S__SERVICE_NAME
+          value: emqx-service
+        - name: EMQX_CLUSTER__K8S__APISERVER
+          value: "https://kubernetes.default.svc:443"
+        - name: EMQX_CLUSTER__K8S__NAMESPACE
+          value: default
 
-            - name: CLUSTER__K8S__NAMESPACE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.namespace
-
-            - name: CLUSTER__K8S__SERVICE_NAME
-              value: "emqx-headless"
-
-            - name: CLUSTER__K8S__ADDRESS_TYPE
-              value: "ip"
