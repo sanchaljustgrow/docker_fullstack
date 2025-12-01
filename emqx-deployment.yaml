@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: emqx
-        image: emqx/emqx:v4.4.11
+        image:  emqx/emqx:v4.1-rc.1
         ports:
         - name: mqtt
           containerPort: 1883
