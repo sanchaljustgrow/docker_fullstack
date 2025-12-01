@@ -1,29 +1,29 @@
-replicaCount: 3   # Number of nodes in cluster, always odd recommended
+
+replicaCount: 3  # 3 EMQX pods for HA
 
 image:
-  repository: emqx/emqx-enterprise
-  tag: latest
-  pullPolicy: IfNotPresent
+  repository: emqx/emqx
+  tag: "5.6"
 
 service:
-  type: ClusterIP
-  mqtt: 1883
-  mqttssl: 8883
-  dashboard: 18083
+  type: LoadBalancer  # or NodePort if no LB
+  ports:
+    mqtt:
+      port: 1883
+    mqtts:
+      port: 8883
+    ws:
+      port: 8083
+    dashboard:
+      port: 18083
 
 persistence:
-  enabled: false
+  enabled: true
+  size: 20Gi
+  storageClass: standard  # change to your cluster's StorageClass
 
 emqxConfig:
-  EMQX_NAME: "emqx"
-  EMQX_HOST: "0.0.0.0"
-  EMQX_CLUSTER__DISCOVERY: "k8s"
-  EMQX_CLUSTER__K8S__NAMESPACE: "default"
-  EMQX_CLUSTER__K8S__APP_NAME: "my-emqx"
-
-# Enable SSL if needed
-ssl:
-  enabled: false
-
-metrics:
-  enable: true
+  EMQX_NODE__COOKIE: "super-secret-cookie"
+  EMQX_CLUSTER__DISCOVERY_STRATEGY: k8s
+  EMQX_CLUSTER__K8S__ADDRESS_TYPE: ip
+  EMQX_AUTH__ENABLE: true
