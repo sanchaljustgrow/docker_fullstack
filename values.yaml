@@ -6,7 +6,7 @@ image:
   tag: "5.6"
 
 service:
-  type: LoadBalancer  # or NodePort if no LB
+  type: NodePort  # or NodePort if no LB
   ports:
     mqtt:
       port: 1883
