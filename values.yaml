@@ -4,26 +4,68 @@ replicaCount: 3  # 3 EMQX pods for HA
 image:
   repository: emqx/emqx
   tag: "5.6"
+  pullPolicy: IfNotPresent
 
 service:
-  type: NodePort  # or NodePort if no LB
+  type: NodePort
+  externalTrafficPolicy: Cluster  # Ensures proper routing for NodePort
   ports:
     mqtt:
+      enabled: true
       port: 1883
+      nodePort: 30483    # Explicit NodePort for MQTT
     mqtts:
+      enabled: true
       port: 8883
+      nodePort: 32426    # Explicit NodePort for MQTT over TLS
     ws:
+      enabled: true
       port: 8083
+      nodePort: 31816    # Explicit NodePort for WebSocket
     dashboard:
+      enabled: true
       port: 18083
+      nodePort: 30825    # Explicit NodePort for Dashboard
 
 persistence:
   enabled: true
   size: 20Gi
-  storageClass: standard  # change to your cluster's StorageClass
+  storageClass: standard  # Change to your cluster's StorageClass
+  accessModes:
+    - ReadWriteOnce
 
 emqxConfig:
   EMQX_NODE__COOKIE: "super-secret-cookie"
-  EMQX_CLUSTER__DISCOVERY_STRATEGY: k8s
-  EMQX_CLUSTER__K8S__ADDRESS_TYPE: ip
-  EMQX_AUTH__ENABLE: true
+  EMQX_CLUSTER__DISCOVERY_STRATEGY: "k8s"
+  EMQX_CLUSTER__K8S__ADDRESS_TYPE: "ip"
+  EMQX_AUTH__ENABLE: "true"
+
+# Optional: Add resource limits for stability
+resources:
+  requests:
+    cpu: "500m"
+    memory: "1Gi"
+  limits:
+    cpu: "2"
+    memory: "4Gi"
+
+# Health probes (no authentication required)
+livenessProbe:
+  enabled: true
+  httpGet:
+    path: /status
+    port: 18083
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 6
+
+readinessProbe:
+  enabled: true
+  httpGet:
+    path: /status
+    port: 18083
+  initialDelaySeconds: 15
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 6
