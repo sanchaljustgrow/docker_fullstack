@@ -1,0 +1,33 @@
+replicaCount: 3
+
+service:
+  type: NodePort
+  ports:
+    mqtt: 1883
+    mqtts: 8883
+    dashboard: 18083
+    ws: 8083
+    wss: 8084
+  nodePorts:
+    mqtt: 30083
+    dashboard: 30080
+
+persistence:
+  enabled: true
+  size: 5Gi
+  storageClass: standard
+
+dashboard:
+  defaultUsername: admin
+  defaultPassword: StrongPass123
+
+cluster:
+  k8sAutoDiscovery: true  # Enables automatic Kubernetes cluster discovery
+  mnesia:
+    enabled: true          # Persist Mnesia database to disk (HA sessions & state)
+
+extraConfig:
+  emqx:
+    mqtt:
+      allow_anonymous: true
+      persistent_client_expiration: 1h
