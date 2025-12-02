@@ -24,14 +24,15 @@ dashboard:
   defaultPassword: StrongPass123
 
 cluster:
-  k8sAutoDiscovery: true        # Enable automatic Kubernetes cluster discovery
+  k8sAutoDiscovery: true        # Auto-discover nodes in the same namespace
   mnesia:
-    enabled: true               # Persist Mnesia database (HA sessions & state)
+    enabled: true               # Persist Mnesia database for HA sessions & state
     dir: /opt/emqx/data/mnesia # Store Mnesia DB on persistent volume
-    replicas: 2                 # Replicate Mnesia to 2 nodes for HA (optional, recommended)
 
 extraConfig:
   emqx:
     mqtt:
       allow_anonymous: true
-      persistent_client_expiration: 1h  # Keep sessions for 1 hour after disconnect
+      persistent_client_expiration: 24h  # Keep sessions 24h after disconnect
+      session_qos_1_retry: 60            # Retry messages if disconnected
+      max_clientid_len: 64               # Optional, adjust if needed
