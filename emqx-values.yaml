@@ -8,32 +8,29 @@ service:
     dashboard: 18083
     ws: 8083
     wss: 8084
-  # NodePorts are optional; letting Kubernetes assign automatically
-  # nodePorts:
-  #   mqtt: 30083
-  #   dashboard: 30080
 
 persistence:
   enabled: true
   size: 5Gi
   storageClass: standard
-  mountPath: /opt/emqx/data  # Persist Mnesia and other data
+  mountPath: /opt/emqx/data
 
 dashboard:
   defaultUsername: admin
   defaultPassword: StrongPass123
 
 cluster:
-  k8sAutoDiscovery: true        # Auto-discover nodes in the same namespace
+  k8sAutoDiscovery: true
   mnesia:
-    enabled: true               # Persist Mnesia DB for HA sessions/state
-    dir: /opt/emqx/data/mnesia # Store Mnesia DB on persistent volume
-    replicas: 3                 # Ensure HA by replicating Mnesia across 3 nodes
+    enabled: true
+    dir: /opt/emqx/data/mnesia
+    # Best practice is to set Mnesia replicas equal to the number of pods
+    replicas: 3
 
 extraConfig:
   emqx:
     mqtt:
       allow_anonymous: true
-      persistent_client_expiration: 24h  # Keep sessions 24h after disconnect
-      session_qos_1_retry: 60            # Retry messages if disconnected
-      max_clientid_len: 64               # Optional, adjust as needed
+      persistent_client_expiration: 24h
+      session_qos_1_retry: 60
+      max_clientid_len: 64
