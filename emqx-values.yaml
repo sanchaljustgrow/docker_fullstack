@@ -8,7 +8,7 @@ service:
     dashboard: 18083
     ws: 8083
     wss: 8084
-  # Remove nodePorts to let Kubernetes automatically assign free ports
+  # Let Kubernetes automatically assign free NodePorts
   # nodePorts:
   #   mqtt: 30083
   #   dashboard: 30080
@@ -17,20 +17,21 @@ persistence:
   enabled: true
   size: 5Gi
   storageClass: standard
-  mountPath: /opt/emqx/data  # Ensure Mnesia and other data persist
+  mountPath: /opt/emqx/data  # Mount path for Mnesia and other persistent data
 
 dashboard:
   defaultUsername: admin
   defaultPassword: StrongPass123
 
 cluster:
-  k8sAutoDiscovery: true      # Auto-discover nodes in the same namespace
+  k8sAutoDiscovery: true        # Enable automatic Kubernetes cluster discovery
   mnesia:
-    enabled: true             # Persist Mnesia database for HA sessions & state
-    dir: /opt/emqx/data/mnesia  # Store Mnesia DB on persistent volume
+    enabled: true               # Persist Mnesia database (HA sessions & state)
+    dir: /opt/emqx/data/mnesia # Store Mnesia DB on persistent volume
+    replicas: 2                 # Replicate Mnesia to 2 nodes for HA (optional, recommended)
 
 extraConfig:
   emqx:
     mqtt:
       allow_anonymous: true
-      persistent_client_expiration: 1h   # Keep sessions for 1 hour after disconnect
+      persistent_client_expiration: 1h  # Keep sessions for 1 hour after disconnect
