@@ -1,3 +1,4 @@
+
 replicaCount: 3
 
 service:
@@ -34,10 +35,6 @@ extraConfig:
       session_qos_1_retry: 60
       max_clientid_len: 64
 
-# -------------------------
-# ADD THIS (AUTO SCALING)
-# -------------------------
-
 resources:
   requests:
     cpu: 500m
@@ -46,9 +43,10 @@ resources:
     cpu: 2000m
     memory: 4Gi
 
+# If your Helm chart supports autoscaling, this block will generate HPA automatically.
+# If not, we will apply a standalone HPA (next section).
 autoscaling:
   enabled: true
   minReplicas: 3
   maxReplicas: 10
-  targetCPUUtilizationPercentage: 50 
-  targetMemoryUtilizationPercentage: 50 
+  targetCPUUtilizationPercentage: 50
