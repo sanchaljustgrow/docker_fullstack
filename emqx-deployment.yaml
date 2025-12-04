@@ -3,13 +3,14 @@ kind: Service
 metadata:
   name: emqx
 spec:
-  selector:
-    app: emqx
   ports:
-    - name: dashboard
+    - name: emqx-dashboard
       port: 18083
       targetPort: 18083
+      nodePort: 32333
       protocol: TCP
+  selector:
+    app: emqx
   type: NodePort
 ---
 apiVersion: apps/v1
@@ -32,26 +33,28 @@ spec:
       - name: emqx
         image: emqx/emqx:latest
         ports:
-          - containerPort: 18083
-            name: dashboard
+        - name: emqx-dashboard
+          containerPort: 18083
+        env:
+        - name: EMQX_CLUSTER__DISCOVERY
+          value: k8s
+        - name: EMQX_NAME
+          value: emqx
+        - name: EMQX_CLUSTER__K8S__APISERVER
+          value: http://127.0.0.1:8001
+        - name: EMQX_CLUSTER__K8S__NAMESPACE
+          value: default
+        - name: EMQX_CLUSTER__K8S__SERVICE_NAME
+          value: emqx
+        - name: EMQX_CLUSTER__K8S__ADDRESS_TYPE
+          value: ip
+        - name: EMQX_CLUSTER__K8S__APP_NAME
+          value: emqx
         resources:
           requests:
-            cpu: "250m"
+            cpu: 100m
+            memory: 128Mi
           limits:
-            cpu: "500m"
-        env:
-          - name: EMQX_CLUSTER__DISCOVERY
-            value: k8s
-          - name: EMQX_NAME
-            value: emqx
-          - name: EMQX_CLUSTER__K8S__APISERVER
-            value: http://172.20.0.2:8080
-          - name: EMQX_CLUSTER__K8S__NAMESPACE
-            value: default
-          - name: EMQX_CLUSTER__K8S__SERVICE_NAME
-            value: emqx
-          - name: EMQX_CLUSTER__K8S__ADDRESS_TYPE
-            value: ip
-          - name: EMQX_CLUSTER__K8S__APP_NAME
-            value: emqx
+            cpu: 500m
+            memory: 512Mi
         tty: true
