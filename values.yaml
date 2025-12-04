@@ -1,28 +1,52 @@
-# -------------------------------
-# EMQX Deployment mode (NOT StatefulSet)
-# -------------------------------
-statefulset:
-  enabled: false
+skipCRDs: false
+singleNamespace: false
+development: false
+replicaCount: 1
+revisionHistoryLimit: 10
 
-deployment:
+image:
+  repository: emqx/emqx-operator-controller
+  pullPolicy: IfNotPresent
+  tag: "2.2.28"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+webhook:
   enabled: true
 
-replicaCount: 2
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
 
-persistence:
-  enabled: false
+podAnnotations: {}
 
-# -------------------------------
-# DNS cluster discovery
-# -------------------------------
-emqxConfig:
-  cluster:
-    discovery: "dns"
-    dns:
-      name: "emqx-headless.emqx.svc.cluster.local"
+podSecurityContext:
+  runAsNonRoot: true
 
-# -------------------------------
-# Service expose
-# -------------------------------
-service:
-  type: NodePort
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+cert-manager:
+  # Using [cert manager](https://github.com/jetstack/cert-manager) for provisioning the certificates for the webhook server.
+  # You can follow [the cert manager documentation](https://cert-manager.io/docs/installation/) to install it.
+  # Or you can use your own certificate, You need create a TLS secret for provisioning the certificates for the "${FULLNAME}-webhook-service.${NAMESPACE}.svc"
+  enable: true
+  # If not set, a name is generated using the "${FULLNAME}-webhook-server-cert"
+  secretName: ""
