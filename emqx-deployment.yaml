@@ -1,39 +1,81 @@
-apiVersion: apps/v1
-kind: Deployment
+---
+apiVersion: apps.emqx.io/v2beta1
+kind: EMQX
 metadata:
-  name: emqx-deployment
-  labels:
-    app: emqx
+  name: emqx
+  namespace: emqx-new
 spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: emqx
-  template:
-    metadata:
-      labels:
-        app: emqx
+  image: emqx:5
+  imagePullPolicy: IfNotPresent
+  coreTemplate:
     spec:
-      containers:
-      - name: emqx
-        image:  emqx/emqx:v4.1-rc.1
-        ports:
-        - name: mqtt
-          containerPort: 1883
-        - name: mqtts
-          containerPort: 8883
-        - name: dashboard
-          containerPort: 18083
-        env:
-        - name: EMQX_NAME
-          value: emqx
-        - name: EMQX_CLUSTER__DISCOVERY
-          value: kubernetes
-        - name: EMQX_CLUSTER__K8S__APP_NAME
-          value: emqx
-        - name: EMQX_CLUSTER__K8S__SERVICE_NAME
-          value: emqx-service
-        - name: EMQX_CLUSTER__K8S__NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
+      extraVolumes:
+        - name: emqx-tls
+          secret:
+            secretName: emqx-tls
+      extraVolumeMounts:
+        - name: emqx-tls
+          mountPath: /mounted/cert
+  dashboardServiceTemplate:
+    spec:
+      type: LoadBalancer
+  listenersServiceTemplate:
+    spec:
+      type: NodePort
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: emqx-configs
+  namespace: emqx-new
+data:
+  emqx.conf: |
+    dashboard.listeners.http.bind = 18083
+    dashboard.default_username = "admin"
+    dashboard.default_password = "emqxpass"
+    listeners.ssl.default.bind = 8883
+    listeners.ssl.default.ssl_options.certfile = "/mounted/cert/tls.crt"
+    listeners.ssl.default.ssl_options.keyfile = "/mounted/cert/tls.key"
+    listeners.ssl.default.ssl_options.cacertfile = "/mounted/cert/ca.crt"
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: emqx-tls
+  namespace: emqx-new
+type: Opaque
+data:
+  ca.crt: BASE64_ENCODED_CA
+  tls.crt: BASE64_ENCODED_CERT
+  tls.key: BASE64_ENCODED_KEY
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: emqx-mqtt-ingress
+  namespace: emqx-new
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: emqx-mqtt.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: emqx-listeners
+            port:
+              number: 8883
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tcp-services
+  namespace: ingress
+data:
+  "8883": "emqx-new/emqx-listeners:8883"
