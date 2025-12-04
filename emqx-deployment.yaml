@@ -1,51 +1,57 @@
----
-apiVersion: apps.emqx.io/v2beta1
-kind: EMQX
+apiVersion: v1
+kind: Service
 metadata:
   name: emqx
-  namespace: emqx-new
 spec:
-  image: emqx:5
-  imagePullPolicy: IfNotPresent
-  coreTemplate:
-    spec:
-      extraVolumes:
-        - name: emqx-tls
-          secret:
-            secretName: emqx-tls
-      extraVolumeMounts:
-        - name: emqx-tls
-          mountPath: /mounted/cert
-  dashboardServiceTemplate:
-    spec:
-      type: LoadBalancer
-  listenersServiceTemplate:
-    spec:
-      type: NodePort
-
+  selector:
+    app: emqx
+  ports:
+    - name: dashboard
+      port: 18083
+      targetPort: 18083
+      protocol: TCP
+  type: NodePort
 ---
-apiVersion: v1
-kind: ConfigMap
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: emqx-configs
-  namespace: emqx-new
-data:
-  emqx.conf: |
-    dashboard.listeners.http.bind = 18083
-    dashboard.default_username = "admin"
-    dashboard.default_password = "emqxpass"
-    listeners.ssl.default.bind = 8883
-    listeners.ssl.default.ssl_options.certfile = "/mounted/cert/tls.crt"
-    listeners.ssl.default.ssl_options.keyfile = "/mounted/cert/tls.key"
-    listeners.ssl.default.ssl_options.cacertfile = "/mounted/cert/ca.crt"
-
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: emqx-tls
-  namespace: emqx-new
-type: Opaque
-data:
-  ca.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURVRENDQW9tZ0F3SUJBZ0lKQU5hTlZyU2FtWEl3Q2dZSUtvWkl6ajBFQXdJd0pERXdNQXdHQTFVRUF3d0pTVzV2Y21jZ0JnTlYKQkFZVEFsVlRNQjRYRFRFNE1ERXhNVE00V2hjTk1qQXdNREF3TkRZeE1UQXhNREUyV2pBWk1CMEdBMVVFQ2hNTQpCZ05WQkFZVEFsVlRNQjRYRFRFNE1ERXhNVE00V2pBWk1CMEdBMVVFQ2hNTQpCZ05WQkFZVEFsVlRNQjRYRFRFNE1ERXhNVE00V2pBWk1CMEdBMVVFQ2hNTQpCZ05WQkFZVEFsVlRNQjRYRFRFNE1ERXhNVE00V2pBWk1CMEdBMVVFQ2hNTQpCZ05WQkFZVEFsVlRNQjRYRFRFNE1ERXhNVE00V2pBWk1CMEdBMVVFQ2hNTQpCZ05WQkFZVEFsVlRNQjRYRFRFNE1ERXhNVE00V2pBWk1CMEdBMVVFQ2hNTQpCZ05WQkFZVEFsVlRNQjRYRFRFNE1ERXhNVE00V2pBWk1CMEdBMVVFQ0FRRGxNQjRYRFRFNE1ERXhNVE00V2pBWk1CMEdBMVVFQ2hNTQpCZ05WQkFZVEFsVlRNQjRYRFRFNE1ERXhNVE00V2pBWk1CMEdBMVVFQ2hNTQpCZ05WQkFZVEFsVlRNQjRYRFRFNE1ERXhNVE00V2pBWk1CMEdBMVVFQ0FRRGxNQjRYRFRFNE1ERXhNVE00V2pBWk1CMEdBMVVFQ2hNTQpCZ05WQkFZVEFsVlRNQjRYRFRFNE1ERXhNVE00V2pBWk1CMEdBMVVFQ2hNTQpCZ05WQkFZVEFsVlRNQjRYRFRFNE1ERXhNVE00V2pBWk1CMEdBMVVFQ0FRRGxNQjRYRFRFNE1ERXhNVE00V2pBWk1CMEdBMVVFQ2hNTQpCZ05WQkFZVEFsVlRNQjRYRFRFNE1ERXhNVE00V2pBWk1CMEdBMVVFQ0FRRGxNQjRYRFRFNE1ERXhNVE00V2pBWk1CMEdBMVVFQ0FRRGxNQjRYRFRFNE1ERXhNVE00V2pBWk1CMEdBMVVFQ0FRRGxNQjRYRFRFNE1ERQpNVE00V2pBWk1CMEdBMVVFQ0FRRGxNQjRYRFRFNE1ERXhNVE00V2pBWk1CMEdBMVVFQ0FRRGxNQjRYRFRFNE1ERXhNVE00V2pBWk1CMEdBMVVFQ0FRRGxNQjRYRFRFNE1ERXhNVE00V2pBWk1CMEdBMVVFQ0FRRGxNQjRYRFRFNE1ERXhNVE00V2pBWk1CMEdBMVVFQ0FRRGxNQjRYRFRFNE1ERQpNVE00V2pBWk1CMEdBMVVFQ0FRRGxNQjRYRFRFNE1ERXhNVE00V2pBWk1CMEdBMVVFQ0FRRGxNQjRYRFRFNE1ERQpNVE00V2pBWk1CMEdBMVVFQ0FRRGxNQjRYRFRFNE1ERXhNVE00V2pBWk1CMEdBMVVFQ0FRRGxNQjRYRFRFNE1ERQpNVE00V2pBWk1CMEdBMVVFQ0FRRGxNQjRYRFRFNE1ERQpNVE00V2pBWk1CMEdBMVVFQ0FRRGxNQjRYRFRFNE1ERQpNVE00V2pBWk1CMEdBMVVFQ0FRRGxNQjRYRFRFNE1ERQpNVE00V2pBWk1CMEdBMVVFQ0FRRGxNQjRYRFRFNE1ERQpNVE00V2pBWk1CMEdBMVVFQ0FRRGxNQjRYRFRFNE1ERQpNVE00V2pBWk1CMEdBMVVFQ0FRRGxNQjRYRFRFNE1ERQpNVE00V2pBWk1CMEdBMVVFQ0FRRGxNQjRYRFRFNE1ERQpNVE00V2pBWk1CMEdBMVVFQ0FRRGxNQjRYRFRFNE1ERQpNVE00V2pBWk1CMEdBMVVFQ0FRRGxNQjRYRFRFNE1ERQpNVE00V2pBWk1CMEdBMVVFQ0FRRGxNQjRYRFRFNE1ERQpNVE00V2pBWk1CMEdBMVVFQ0FRRGxNQjRYRFRFNE1ERQpNVE00V2pBWk1CMEdBMVVFQ0FRRGxNQjRYRFRFNE1ERQpNVE00V2pBWk1CMEdBMVVFQ0FRRGxNQjRYRFRFNE1ERQ==
-  tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0VURS0tLS0tCk1JSURVRENDQW9tZ0F3SUJBZ0lKQU5hTlZyU2FtWEl3Q2dZSUtvWkl6ajBFQXdJd0pERXdNQXdHQTFVRUF3d0pTVzV2Y21jZ0JnTlYKQkFZVEFsVlRNQjRYRFRFNE1ERXhNVE00V2pBWk1CMEdBMVVFQ2hNTQpCZ05WQkFZVEFsVlRNQjRYRFRFNE1ERXhNVE00V2pBWk1CMEdBMVVFQ2hNTQpCZ05WQkFZVEFsVlRNQjRYRFRFNE1ERXhNVE00V2pBWk1CMEdBMVVFQ2hNTQpCZ05WQkFZVEFsVlRNQjRYRFRFNE1ERXhNVE00V2pBWk1CMEdBMVVFQ2hNTQpCZ05WQkFZVEFsVlRNQjRYRFRFNE1ERQpNVE00V2pBWk1CMEdBMVVFQ0FRRGxNQjRYRFRFNE1ERQpNVE00V2pBWk1CMEdBMVVFQ0FRRGxNQjRYRFRFNE1ERQpNVE00V2p
+  name: emqx
+  labels:
+    app: emqx
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: emqx
+  template:
+    metadata:
+      labels:
+        app: emqx
+    spec:
+      containers:
+      - name: emqx
+        image: emqx/emqx:latest
+        ports:
+          - containerPort: 18083
+            name: dashboard
+        resources:
+          requests:
+            cpu: "250m"
+          limits:
+            cpu: "500m"
+        env:
+          - name: EMQX_CLUSTER__DISCOVERY
+            value: k8s
+          - name: EMQX_NAME
+            value: emqx
+          - name: EMQX_CLUSTER__K8S__APISERVER
+            value: http://172.20.0.2:8080
+          - name: EMQX_CLUSTER__K8S__NAMESPACE
+            value: default
+          - name: EMQX_CLUSTER__K8S__SERVICE_NAME
+            value: emqx
+          - name: EMQX_CLUSTER__K8S__ADDRESS_TYPE
+            value: ip
+          - name: EMQX_CLUSTER__K8S__APP_NAME
+            value: emqx
+        tty: true
