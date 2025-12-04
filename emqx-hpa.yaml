@@ -1,16 +1,14 @@
-
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: emqx-hpa
-  namespace: emqx
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
-    kind: StatefulSet
-    name: my-emqx               # <-- must match your actual StatefulSet
-  minReplicas: 3
-  maxReplicas: 10
+    kind: Deployment
+    name: emqx
+  minReplicas: 2
+  maxReplicas: 5
   metrics:
     - type: Resource
       resource:
@@ -18,12 +16,3 @@ spec:
         target:
           type: Utilization
           averageUtilization: 50
-    - type: Resource
-      resource:
-        name: memory
-        target:
-          type: Utilization
-          averageUtilization: 50
-  behavior:
-    scaleDown:
-      stabilizationWindowSeconds: 300
