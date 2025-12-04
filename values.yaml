@@ -1,7 +1,7 @@
 skipCRDs: false
 singleNamespace: false
 development: false
-replicaCount: 1
+replicaCount: 3               # Changed to 3 nodes for clustering
 revisionHistoryLimit: 10
 
 image:
@@ -31,3 +31,21 @@ resources:
 
 cert-manager:
   enable: true
+
+clustering:
+  k8s:
+    enabled: true
+    serviceName: emqx
+    namespace: default
+
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 50
+
+service:
+  type: NodePort
+  ports:
+    dashboard: 18083
+    mqtt: 1883
