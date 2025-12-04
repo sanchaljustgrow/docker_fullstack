@@ -1,7 +1,7 @@
 skipCRDs: false
 singleNamespace: false
 development: false
-replicaCount: 3               # Changed to 3 nodes for clustering
+replicaCount: 3               # 3-node cluster
 revisionHistoryLimit: 10
 
 image:
@@ -9,8 +9,9 @@ image:
   pullPolicy: IfNotPresent
   tag: "2.2.28"
 
+# Disable webhook for kind/local clusters
 webhook:
-  enabled: true
+  enabled: false
 
 serviceAccount:
   create: true
@@ -29,8 +30,9 @@ resources:
     cpu: 100m
     memory: 128Mi
 
+# No need for cert-manager if webhook disabled
 cert-manager:
-  enable: true
+  enable: false
 
 clustering:
   k8s:
@@ -49,3 +51,6 @@ service:
   ports:
     dashboard: 18083
     mqtt: 1883
+    mqtts: 8883
+    dashboard_ws: 8083
+    dashboard_wss: 8084
