@@ -1,0 +1,28 @@
+# -------------------------------
+# EMQX Deployment mode (NOT StatefulSet)
+# -------------------------------
+statefulset:
+  enabled: false
+
+deployment:
+  enabled: true
+
+replicaCount: 2
+
+persistence:
+  enabled: false
+
+# -------------------------------
+# DNS cluster discovery
+# -------------------------------
+emqxConfig:
+  cluster:
+    discovery: "dns"
+    dns:
+      name: "emqx-headless.emqx.svc.cluster.local"
+
+# -------------------------------
+# Service expose
+# -------------------------------
+service:
+  type: NodePort
