@@ -9,19 +9,11 @@ image:
   pullPolicy: IfNotPresent
   tag: "2.2.28"
 
-imagePullSecrets: []
-nameOverride: ""
-fullnameOverride: ""
-
 webhook:
   enabled: true
 
 serviceAccount:
   create: true
-  annotations: {}
-  name: ""
-
-podAnnotations: {}
 
 podSecurityContext:
   runAsNonRoot: true
@@ -37,16 +29,5 @@ resources:
     cpu: 100m
     memory: 128Mi
 
-nodeSelector: {}
-
-tolerations: []
-
-affinity: {}
-
 cert-manager:
-  # Using [cert manager](https://github.com/jetstack/cert-manager) for provisioning the certificates for the webhook server.
-  # You can follow [the cert manager documentation](https://cert-manager.io/docs/installation/) to install it.
-  # Or you can use your own certificate, You need create a TLS secret for provisioning the certificates for the "${FULLNAME}-webhook-service.${NAMESPACE}.svc"
   enable: true
-  # If not set, a name is generated using the "${FULLNAME}-webhook-server-cert"
-  secretName: ""
