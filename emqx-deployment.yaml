@@ -47,9 +47,9 @@ metadata:
   namespace: emqx-new
 type: Opaque
 data:
-  ca.crt: BASE64_ENCODED_CA
-  tls.crt: BASE64_ENCODED_CERT
-  tls.key: BASE64_ENCODED_KEY
+  ca.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCg==   # Replace with your Base64 CA if available
+  tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0VURS0tLS0tCg==  # Replace with your Base64 TLS cert
+  tls.key: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQo=  # Replace with your Base64 TLS key
 
 ---
 apiVersion: networking.k8s.io/v1
@@ -76,6 +76,6 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: tcp-services
-  namespace: ingress
+  namespace: emqx-new
 data:
   "8883": "emqx-new/emqx-listeners:8883"
